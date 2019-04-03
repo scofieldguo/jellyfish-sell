@@ -74,7 +74,7 @@ public class WeChatService implements IWeChatService {
 
 
     @Override
-    public String getSessionFromWechat(String code) {
+    public String getOpenIdnFromWechat(String code) {
         String url = "https://api.weixin.qq.com/sns/jscode2session?appid=" + wxConfig.getAppId() + "&secret=" + wxConfig.getAppSecret() + "&js_code=" + code + "&grant_type=authorization_code";
         CloseableHttpClient httpClient = HttpClientUtils.getConnection(HttpClientUtils.getPoolingHttpClientConnectionManager(200, 200), HttpClientUtils.getRequestConfig(1000, 1000, 1000, false));
         String result = HttpClientUtils.httpGet(url, httpClient);
@@ -82,7 +82,7 @@ public class WeChatService implements IWeChatService {
             JSONObject object = JSONObject.parseObject(result);
             logger.info(object.toJSONString());
             if (object != null) {
-                return object.getString("session_key");
+                return object.getString("openid");
             }
         }
         logger.info("获取微信session失败");
@@ -140,12 +140,6 @@ public class WeChatService implements IWeChatService {
         return false;
     }
 
-
-    @Override
-    public String decryptData(String encryptedData, String iv, String code) {
-        WXBizDataCrypt biz = new WXBizDataCrypt(wxConfig.getAppId(), getSessionFromWechat(code));
-        return biz.decryptData(encryptedData, iv);
-    }
 
 
     @Override

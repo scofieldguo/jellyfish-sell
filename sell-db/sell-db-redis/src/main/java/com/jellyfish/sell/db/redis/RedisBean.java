@@ -620,15 +620,14 @@ public class RedisBean {
         });
     }
 
-    public void addStringTime(final String key, final String field, Long time, int db) {
-        redisTemplate.execute(new RedisCallback<Object>() {
+    public Boolean addStringTime(final String key, final String field, Long time, int db) {
+        return redisTemplate.execute(new RedisCallback<Boolean>() {
             @Override
-            public Object doInRedis(RedisConnection connection) throws DataAccessException {
+            public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
                 RedisSerializer<String> serializer = redisTemplate.getStringSerializer();
                 byte[] serKey = serializer.serialize(key);
                 byte[] serField = serializer.serialize(field);
-                connection.setEx(serKey, time, serField);
-                return null;
+                return connection.setEx(serKey, time, serField);
             }
         });
     }
@@ -649,6 +648,21 @@ public class RedisBean {
         });
     }
 
+    public Boolean setStringTime(final String key, final String field, Long time, int db) {
+        return redisTemplate.execute(new RedisCallback<Boolean>() {
+            @Override
+            public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
+                RedisSerializer<String> serializer = redisTemplate.getStringSerializer();
+                byte[] serKey = serializer.serialize(key);
+                byte[] serField = serializer.serialize(field);
+                Boolean result = connection.set(serKey, serField);
+                if (result) {
+                    connection.expire(serKey, time);
+                }
+                return result;
+            }
+        });
+    }
     public Long getListLen(final String key, int db) {
         return redisTemplate.execute(new RedisCallback<Long>() {
             @Override

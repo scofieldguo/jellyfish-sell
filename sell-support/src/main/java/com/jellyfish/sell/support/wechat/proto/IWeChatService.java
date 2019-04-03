@@ -6,7 +6,7 @@ public interface IWeChatService {
     /**
      * 获取微信sessionkey
      * */
-    String getSessionFromWechat(String code);
+    String getOpenIdnFromWechat(String code);
     /**
      * 获取accessToken
      * */
@@ -15,10 +15,6 @@ public interface IWeChatService {
      * 发送模板信息
      * */
     boolean sendTemlate(String template);
-    /**
-     * 解密微信用户信息
-     * */
-    String decryptData(String encrypted, String iv, String code);
     /**
      * 获取微信支付验证信息
      * */
