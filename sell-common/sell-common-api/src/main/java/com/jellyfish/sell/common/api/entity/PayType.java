@@ -6,26 +6,20 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
-@TableName("tb_app_share_material")
-public class AppShareMaterial implements Serializable {
+@TableName("tb_pay_type")
+public class PayType implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    public static final int STATUS_ON=1;
-    public static final int STATUS_OFF=2;
-
+    private static final long serialVersionUID = -5200499202580404412L;
     @TableId(type = IdType.AUTO)
     private Integer id;
-
-    private String title;
-
-    private String imgUrl;
-
+    /**
+     * 名称
+     */
+    private String name;
+    /**
+     * 状态 1：可用 0：停用
+     */
     private Integer status;
-
-    private Date createTime;
-
 }
