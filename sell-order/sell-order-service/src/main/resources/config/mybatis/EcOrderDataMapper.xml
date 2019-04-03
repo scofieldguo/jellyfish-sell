@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jellyfish.sell.order.mapper.EcOrderDataMapper">
+
+    <sql id="table">
+		tb_order_data
+	</sql>
+
+    <select id="findUserLastOrder" resultType="com.jellyfish.sell.order.entity.EcOrderData">
+        select * from
+        <include refid="table"/>
+        <where>
+            user_id = #{userId} and parent_id is NULL order by create_time desc limit 1
+        </where>
+    </select>
+
+    <select id="pageFindByParam" resultType="com.jellyfish.sell.order.entity.EcOrderData">
+        select
+        id,parent_id,user_id,product_price,post_price,pay_order,create_time,pay_status,logistic_status,logistic,logistic_company
+        from
+        <include refid="table"/>
+        <where>
+            <if test="paramMap.userId !=null">
+                and user_id = #{paramMap.userId}
+            </if>
+            <if test="paramMap.fromId !=null">
+                and from_id = #{paramMap.fromId}
+            </if>
+            <if test="paramMap.payStatus !=null">
+                and pay_status =#{paramMap.payStatus}
+            </if>
+            <if test="paramMap.logisticStatus !=null">
+                and logistic_status = #{paramMap.logisticStatus}
+            </if>
+            <if test="paramMap.showType !=null">
+                and show_type = #{paramMap.showType}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <!-- <select id="countByUserId" resultType="Integer">
+        select count(*) from <include refid="table" />
+        <where>
+            <![CDATA[user_id = #{userId}
+            and status < 4]]>
+        </where>
+    </select>
+
+    <select id="countByUserIdAndDateYmd" resultType="Integer">
+        select count(*) from <include refid="table" />
+        <where>
+            <![CDATA[user_id = #{userId}
+            and date_ymd = #{dateYmd}
+            and status = 4]]>
+        </where>
+    </select> -->
+
+    <update id="updateByIdAndUserId" parameterType="com.jellyfish.sell.order.entity.EcOrderData">
+        update
+        <include refid="table"/>
+        <set>
+            <if test="payStatus !=null">
+                pay_status = #{payStatus},
+            </if>
+            <if test="postPrice !=null">
+                post_price = #{postPrice},
+            </if>
+            <if test="payOrder !=null">
+                pay_order = #{payOrder},
+            </if>
+            <if test="modifyTime !=null">
+                modify_time =#{modifyTime},
+            </if>
+            <if test="logistic !=null">
+                logistic = #{logistic},
+            </if>
+            <if test="logisticStatus !=null">
+                logistic_status = #{logisticStatus},
+            </if>
+            <if test="prepayId !=null">
+                prepay_id = #{prepayId},
+            </if>
+            <if test="showType !=null">
+                show_type = #{showType},
+            </if>
+            <if test="payTime !=null">
+                pay_time = #{payTime},
+            </if>
+            <if test="sendTime !=null">
+                send_time = #{sendTime},
+            </if>
+        </set>
+        <where>
+            id = #{id}
+            and user_id = #{userId}
+        </where>
+    </update>
+
+    <update id="updateOrderToPay" parameterType="com.jellyfish.sell.order.entity.EcOrderData">
+        update
+        <include refid="table"/>
+        <set>
+            <if test="showType !=null">
+                show_type = #{showType},
+            </if>
+            <if test="payStatus !=null">
+                pay_status = #{payStatus},
+            </if>
+            <if test="payOrder !=null">
+                pay_order = #{payOrder},
+            </if>
+            <if test="modifyTime !=null">
+                modify_time =#{modifyTime},
+            </if>
+            <if test="logistic !=null">
+                logistic = #{logistic},
+            </if>
+            <if test="logisticStatus !=null">
+                logistic_status = #{logisticStatus},
+            </if>
+            <if test="prepayId !=null">
+                prepay_id = #{prepayId},
+            </if>
+            <if test="payTime !=null">
+                pay_time = #{payTime},
+            </if>
+        </set>
+        <where>
+            <![CDATA[id = #{id}
+			and user_id = #{userId}
+			and pay_status < 1]]>
+        </where>
+    </update>
+
+    <update id="updateOrderToCancel" parameterType="com.jellyfish.sell.order.entity.EcOrderData">
+        update
+        <include refid="table"/>
+        <set>
+            <if test="showType !=null">
+                show_type = #{showType},
+            </if>
+            <if test="payStatus !=null">
+                pay_status = #{payStatus},
+            </if>
+            <if test="payOrder !=null">
+                pay_order = #{payOrder},
+            </if>
+            <if test="modifyTime !=null">
+                modify_time =#{modifyTime},
+            </if>
+            <if test="logistic !=null">
+                logistic = #{logistic},
+            </if>
+            <if test="logisticStatus !=null">
+                logistic_status = #{logisticStatus},
+            </if>
+            <if test="prepayId !=null">
+                prepay_id = #{prepayId},
+            </if>
+        </set>
+        <where>
+            <![CDATA[id = #{id}
+			and user_id = #{userId}
+			and pay_status < 2]]>
+        </where>
+    </update>
+
+
+    <update id="updateOrderToPayOver" parameterType="com.jellyfish.sell.order.entity.EcOrderData">
+        update
+        <include refid="table"/>
+        <set>
+
+            <if test="payStatus !=null">
+                pay_status = #{payStatus},
+            </if>
+            <if test="payOrder !=null">
+                pay_order = #{payOrder},
+            </if>
+            <if test="modifyTime !=null">
+                modify_time =#{modifyTime},
+            </if>
+            <if test="logistic !=null">
+                logistic = #{logistic},
+            </if>
+            <if test="logisticStatus !=null">
+                logistic_status = #{logisticStatus},
+            </if>
+            <if test="prepayId !=null">
+                prepay_id = #{prepayId},
+            </if>
+            <if test="showType !=null">
+                show_type = #{showType},
+            </if>
+            <if test="payTime !=null">
+                pay_time = #{payTime},
+            </if>
+        </set>
+        <where>
+            <![CDATA[id = #{id}
+			and user_id = #{userId}
+			and pay_status < 4]]>
+        </where>
+    </update>
+
+    <select id="findOrderDataByIdAndUserId" resultType="com.jellyfish.sell.order.entity.EcOrderData">
+        select * from
+        <include refid="table"/>
+        <where>
+            id = #{id}
+            and user_id =#{userId}
+        </where>
+    </select>
+
+
+</mapper>

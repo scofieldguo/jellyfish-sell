@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+    <!-- dubbo config -->
+    <dubbo:protocol name="dubbo" port="${dubbo1.protocol.port}"
+                    dispatcher="all" threadpool="cached" threads="1000"/>
+    <!-- <dubbo:protocol name="hessian" port="20981"/> -->
+    <!-- <dubbo:protocol name="dubbo" port="20880" server="netty" client="netty"
+        codec="dubbo" serialization="hessian2" charset="UTF-8" threadpool="fixed"
+        threads="100" queues="0" iothreads="9" buffer="8192" accepts="1000" payload="8388608"/> -->
+    <dubbo:application name="${dubbo1.application.name}"/>
+    <dubbo:registry protocol="zookeeper" address="${dubbo1.registry.address}"/>
+    <dubbo:reference id="weChatService"
+                     interface="com.jellyfish.sell.support.wechat.proto.IWeChatService" check="false"/>
+    <dubbo:reference id="wxSendTemplate"
+                     interface="com.jellyfish.sell.support.wechat.proto.IWxSendTemplate" check="false" retries="0"/>
+    <dubbo:service protocol="dubbo" interface="com.jellyfish.sell.user.service.IUserDataService" ref="userDataService" timeout="30000" retries="0">
+    </dubbo:service>
+</beans>

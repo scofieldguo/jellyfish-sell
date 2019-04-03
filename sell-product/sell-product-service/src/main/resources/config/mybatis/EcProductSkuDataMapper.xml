@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jellyfish.sell.product.mapper.EcProductSkuDataMapper">
+
+	<sql id="table">tb_product_sku_data</sql>
+	
+	<update id="deduceProduct">
+		update <include refid="table" />
+		set onsale_num = onsale_num - #{deduceCnt}
+		where id=#{skuId} and onsale_num >= #{deduceCnt}
+	</update>
+
+	<update id="rollbackProduct">
+		update <include refid="table" />
+		set onsale_num = onsale_num + #{rollbackCnt}
+		where id=#{skuId}
+	</update>
+	<update id="rollbackSkuStatus">
+		update <include refid="table" />
+		<set>
+			<if test="status != null">
+				status = #{status},
+			</if>
+			is_onsale = 0, stock = stock + onsale_num, onsale_num = 0
+		</set>
+		where id=#{skuId}
+	</update>
+	<update id="addOnsaleNum">
+		update <include refid="table" />
+		<set>
+			stock = stock - #{addNum}, onsale_num = onsale_num + #{addNum}
+		</set>
+		where id=#{skuId}
+	</update>
+
+	<select id="countOnsaleNumByIds" resultType="Long">
+		select sum(onsale_num) from
+		<include refid="table" />
+		<where>
+			
+			<if test="ids!=null and ids.size>0">
+				AND id IN
+				<foreach collection="ids" item="id" open="("
+					separator="," close=")"> #{id} </foreach>
+			</if>
+			<if test="isOnsale !=null">
+				and is_onsale = #{isOnsale}
+			</if>
+		</where>
+	</select>
+	<select id="countSaleNumByProductId" resultType="Long">
+		select sum(total-stock-onsale_num) from
+		<include refid="table" />
+		<where>
+
+			<if test="productId!=null">
+				and product_id =#{productId}
+			</if>
+			<if test="isOnsale !=null">
+				and is_onsale = #{isOnsale}
+			</if>
+		</where>
+	</select>
+	<select id="countOnsaleNumByProductId" resultType="Long">
+		select sum(onsale_num) from
+		<include refid="table" />
+		<where>
+
+			<if test="productId!=null">
+				and product_id =#{productId}
+			</if>
+			<if test="isOnsale !=null">
+				and is_onsale = #{isOnsale}
+			</if>
+		</where>
+	</select>
+
+	<select id="countProductStock" resultType="Integer">
+		select sum(stock) from
+		<include refid="table" />
+		where product_id=#{productId} and status = 1
+	</select>
+	<select id="countProductTotal" resultType="Integer">
+		select sum(total) from
+		<include refid="table" />
+		where product_id=#{productId} and status = 1
+	</select>
+	<select id="countProductOnsale" resultType="Integer">
+		select sum(onsale_num) from
+		<include refid="table" />
+		where product_id=#{productId} and status = 1
+	</select>
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jellyfish.sell.product.mapper.EcProductSpuDataMapper">
+	<sql id="table">tb_product_spu_data</sql>
+	<select id="findByIdForView" resultType="com.jellyfish.sell.product.entity.EcProductSpuData">
+		select id,name,product_desc,line_price,list_price,product_unit,primary_pic_url,list_pic_url,detail_pic_url,share_pic_url,shop_id,cross_border from <include refid="table" />
+		<where>
+			id = #{id}
+		</where>
+	</select>
+</mapper>

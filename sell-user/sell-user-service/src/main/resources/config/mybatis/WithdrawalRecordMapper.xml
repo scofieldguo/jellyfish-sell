@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jellyfish.sell.user.mapper.WithdrawalRecordMapper">
+	<sql id="table">
+		tb_withdrawal_record
+	</sql>
+	
+	<sql id="where">
+		<where>
+			<if test="paramMap.userId!=null">
+                and user_id = #{paramMap.userId}
+            </if>
+            <if test="paramMap.status!=null">
+                and status = #{paramMap.status}
+            </if>
+            <if test="paramMap.amount!=null">
+                and amount = #{paramMap.amount}
+            </if>
+            <if test="paramMap.startDate!=null and paramMap.startDate!=''">
+                and insert_date = #{paramMap.startDate}
+            </if>
+		</where>
+	</sql>
+	<!-- <insert id="insertReturnKey" parameterType="withdrawalRecord" useGeneratedKeys="true">
+		<selectKey resultType="int" keyProperty="id" order="AFTER">
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		insert into <include refid="table"/>(owner_trade_no,user_id,account,ali_real_name,app_id,amount,`desc`,pay_type,`status`,insert_date,insert_time)
+		values(#{ownerTradeNo},#{userId},#{account},#{aliRealName},#{appId},#{amount},#{desc},#{payType},#{status},#{insertDate},#{insertTime})
+	</insert> -->
+
+	<select id="checkTodayRecord" resultType="int">
+		select count(*) from <include refid="table"/>
+		where user_id = #{userId} and
+			insert_date = #{date}
+		 and `type`=#{type}
+	</select>
+	
+</mapper>

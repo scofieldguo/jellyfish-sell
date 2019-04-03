@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/jellyfish-sell.iml" filepath="$PROJECT_DIR$/jellyfish-sell.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-common/sell-common.iml" filepath="$PROJECT_DIR$/sell-common/sell-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-common/sell-common-api/sell-common-api.iml" filepath="$PROJECT_DIR$/sell-common/sell-common-api/sell-common-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-common/sell-common-service/sell-common-service.iml" filepath="$PROJECT_DIR$/sell-common/sell-common-service/sell-common-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-db/sell-db.iml" filepath="$PROJECT_DIR$/sell-db/sell-db.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-db/sell-db-jdbc/sell-db-jdbc.iml" filepath="$PROJECT_DIR$/sell-db/sell-db-jdbc/sell-db-jdbc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-db/sell-db-mq/sell-db-mq.iml" filepath="$PROJECT_DIR$/sell-db/sell-db-mq/sell-db-mq.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-db/sell-db-redis/sell-db-redis.iml" filepath="$PROJECT_DIR$/sell-db/sell-db-redis/sell-db-redis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-order/sell-order.iml" filepath="$PROJECT_DIR$/sell-order/sell-order.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-order/sell-order-api/sell-order-api.iml" filepath="$PROJECT_DIR$/sell-order/sell-order-api/sell-order-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-order/sell-order-service/sell-order-service.iml" filepath="$PROJECT_DIR$/sell-order/sell-order-service/sell-order-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-product/sell-product.iml" filepath="$PROJECT_DIR$/sell-product/sell-product.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-product/sell-product-api/sell-product-api.iml" filepath="$PROJECT_DIR$/sell-product/sell-product-api/sell-product-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-product/sell-product-service/sell-product-service.iml" filepath="$PROJECT_DIR$/sell-product/sell-product-service/sell-product-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-support/sell-support.iml" filepath="$PROJECT_DIR$/sell-support/sell-support.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-user/sell-user.iml" filepath="$PROJECT_DIR$/sell-user/sell-user.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-user/sell-user-api/sell-user-api.iml" filepath="$PROJECT_DIR$/sell-user/sell-user-api/sell-user-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-user/sell-user-service/sell-user-service.iml" filepath="$PROJECT_DIR$/sell-user/sell-user-service/sell-user-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-web/sell-web.iml" filepath="$PROJECT_DIR$/sell-web/sell-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-web/sell-web-api/sell-web-api.iml" filepath="$PROJECT_DIR$/sell-web/sell-web-api/sell-web-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sell-wechat/sell-wechat.iml" filepath="$PROJECT_DIR$/sell-wechat/sell-wechat.iml" />
+    </modules>
+  </component>
+</project>

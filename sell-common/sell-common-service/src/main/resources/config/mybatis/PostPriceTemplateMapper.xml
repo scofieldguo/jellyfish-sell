@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jellyfish.sell.common.mapper.PostPriceTemplateMapper">
+    <sql id="table">
+        tb_post_price_template
+    </sql>
+    <update id="updateByCommonPrice">
+        UPDATE
+        <include refid="table"/>
+        SET common_province = #{postPriceTemplate.commonProvince},
+        special_price = #{postPriceTemplate.specialPrice},
+        special_province = #{postPriceTemplate.specialProvince}
+        WHERE common_price=#{postPriceTemplate.commonPrice}
+    </update>
+    <select id="getByCommonPrice" resultType="java.lang.Integer">
+        SELECT COUNT(common_price) FROM tb_post_price_template WHERE common_price = #{commonPrice}
+    </select>
+    <select id="getInfoByCommonPrice" resultType="com.jellyfish.sell.common.api.entity.PostPriceTemplate">
+         SELECT * FROM tb_post_price_template WHERE common_price = #{commonPrice}
+    </select>
+
+
+</mapper>

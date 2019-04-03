@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jellyfish.sell.user.mapper.UserAccountMapper">
+    <sql id="table">
+        tb_user_account
+    </sql>
+
+    <update id="addCoinToAccount">
+        update <include refid="table"/>
+        set balance=balance+#{coin},total=total+#{coin}
+        WHERE user_id=#{userId}
+    </update>
+
+    <update id="addBackCoinToAccount">
+        update <include refid="table"/>
+        set balance=balance+#{coin},total=total+#{coin},back=back+#{coin}
+        WHERE user_id=#{userId}
+    </update>
+
+    <update id="subCoinFromAccount">
+        update <include refid="table"/>
+        set balance=balance-#{coin}
+        WHERE user_id=#{userId} and balance>=#{coin}
+    </update>
+    <delete id="deleteUserAccountByUserId">
+        DELETE FROM <include refid="table"/> WHERE user_id = #{userId}
+    </delete>
+</mapper>
