@@ -13,11 +13,6 @@ import java.util.Map.Entry;
 public class RedisBean {
 
     public static final int DEFAULT = 0;
-    public static final int KEY_EXPIRED_LISTEN=10;
-//    public static final int KEY_EXPIRED_LISTEN = 1;
-//    public static final int LOTTO = 2;
-//    public static final int SHARE_KEY_EXPIRED_LISTEN_ = 3;
-//    public static final int LOTTO_NUMBER = 4;
 
     private StringRedisTemplate redisTemplate;
 

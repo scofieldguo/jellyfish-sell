@@ -39,10 +39,8 @@ public class Receiver {
 			return;
 		}
 		String orderId = arg[2];
-		if (arg[1].equals(IEcOrderDataService.TYPE_HELP_KEY)) {
-		} else if (arg[1].equals(IEcOrderDataService.TYPE_PAY_KEY)) {
+		if (arg[1].equals(IEcOrderDataService.TYPE_PAY_KEY)) {
 			sendMsg(2, orderId);
-			sendMsgToLotto(orderId);
 		} else {
 			return;
 		}
