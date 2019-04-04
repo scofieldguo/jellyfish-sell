@@ -1,5 +1,6 @@
 package com.jellyfish.sell.order.service.impl;
 
+import com.aliyun.openservices.shade.com.alibaba.fastjson.serializer.IntegerCodec;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -41,22 +42,11 @@ public class EcOrderItemDataServiceImpl extends ServiceImpl<EcOrderItemDataMappe
     }
 
     @Override
-    public List<EcOrderItemData> findOrderItenmDatasByIds(List<String> ids, Long userId) {
+    public List<EcOrderItemData> findOrderItenmDatasByIds(List<String> ids, Integer fromId) {
         QueryWrapper<EcOrderItemData> wrapper = new QueryWrapper<>(new EcOrderItemData());
-        wrapper.eq("user_id", userId);
+        wrapper.eq("from_id", fromId);
         wrapper.in("id", ids);
         return baseMapper.selectList(wrapper);
-    }
-
-    @Override
-    public Integer countByOrderIdAndChildOrderIdAndUserId(String orderId, String childOrderId, Long userId) {
-        QueryWrapper<EcOrderItemData> wrapper = new QueryWrapper<>(new EcOrderItemData());
-        wrapper.eq("order_id", orderId);
-        wrapper.eq("user_id", userId);
-        if (childOrderId != null && !"".equals(childOrderId)) {
-            wrapper.eq("child_order_id", childOrderId);
-        }
-        return this.count(wrapper);
     }
 
     @Override
@@ -72,10 +62,10 @@ public class EcOrderItemDataServiceImpl extends ServiceImpl<EcOrderItemDataMappe
 
     @Override
     @Transactional
-    public Boolean updateRefundIngStatusByIdsAndUserId(List<String> ids, Long userId, Integer status) {
+    public Boolean updateRefundIngStatusByIdsAndFromId(List<String> ids, Integer fromId, Integer status) {
         UpdateWrapper<EcOrderItemData> wrapper = new UpdateWrapper<>(new EcOrderItemData());
         wrapper.set("status", status);
-        wrapper.eq("user_id", userId);
+        wrapper.eq("from_id",fromId);
         wrapper.in("id", ids);
         return this.update(new EcOrderItemData(), wrapper);
     }
@@ -83,11 +73,11 @@ public class EcOrderItemDataServiceImpl extends ServiceImpl<EcOrderItemDataMappe
     @Override
     @TxTransaction
     @Transactional
-    public Boolean updateOrderItemDataByIds(List<String> ids, Long userId, String childOrderId) {
+    public Boolean updateOrderItemDataByIds(List<String> ids, Integer fromId, String childOrderId) {
         UpdateWrapper<EcOrderItemData> wrapper = new UpdateWrapper<>(new EcOrderItemData());
         wrapper.set("child_order_id", childOrderId);
         wrapper.set("logistic_status", EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
-        wrapper.eq("user_id", userId);
+        wrapper.eq("from_id", fromId);
         wrapper.in("id", ids);
 
         return this.update(new EcOrderItemData(), wrapper);
@@ -96,10 +86,10 @@ public class EcOrderItemDataServiceImpl extends ServiceImpl<EcOrderItemDataMappe
     @Override
     @Transactional
 //    @TxTransaction
-    public Boolean updateOrderItemDataByOrderId(String orderId, Long userId) {
+    public Boolean updateOrderItemDataByOrderId(String orderId, Integer fromId) {
         UpdateWrapper<EcOrderItemData> wrapper = new UpdateWrapper<>(new EcOrderItemData());
         wrapper.set("logistic_status", EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
-        wrapper.eq("user_id", userId);
+        wrapper.eq("from_id", fromId);
         wrapper.eq("order_id", orderId);
         return this.update(new EcOrderItemData(), wrapper);
     }
@@ -108,7 +98,7 @@ public class EcOrderItemDataServiceImpl extends ServiceImpl<EcOrderItemDataMappe
     @Transactional
     public int updateOrderItem(EcOrderItemData orderItemData) {
         UpdateWrapper<EcOrderItemData> wrapper = new UpdateWrapper<>(new EcOrderItemData());
-        wrapper.eq("id", orderItemData.getId()).eq("user_id", orderItemData.getUserId());
+        wrapper.eq("id", orderItemData.getId()).eq("from_id", orderItemData.getFromId());
         return this.baseMapper.update(orderItemData, wrapper);
     }
 

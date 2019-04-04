@@ -25,9 +25,7 @@ import java.util.Map;
  */
 public interface IEcOrderDataService extends IService<EcOrderData> {
 
-    public static final String TYPE_HELP_KEY = "help";
     public static final String TYPE_PAY_KEY = "pay";
-    public static final String ORDER_HELP_KEY = "order_" + TYPE_HELP_KEY;
     public static final String ORDER_PAY_KEY = "order_" + TYPE_PAY_KEY;
 
     /**
@@ -85,7 +83,6 @@ public interface IEcOrderDataService extends IService<EcOrderData> {
      */
     IPage<EcOrderData> pageList(IPage pages, Map<String, Object> params);
 
-    Boolean delOrderHelpTime(String orderId);
 
     Boolean delOrderPayTime(String orderId);
 

@@ -11,19 +11,18 @@ public interface IEcOrderItemDataService extends IService<EcOrderItemData> {
 
     List<EcOrderItemData> findOrderItemDatasByOrderId(String orderId);
 
-    List<EcOrderItemData> findOrderItenmDatasByIds(List<String> ids, Long userId);
+    List<EcOrderItemData> findOrderItenmDatasByIds(List<String> ids, Integer fromId);
 
-    Integer countByOrderIdAndChildOrderIdAndUserId(String orderId, String childOrderId, Long userId);
 
     List<EcOrderItemData> findByOrderIdAndChildOrderIdAndFromId(String orderId, String childOrderId, Integer fromId);
 
-    Boolean updateRefundIngStatusByIdsAndUserId(List<String> ids, Long userId, Integer status);
+    Boolean updateRefundIngStatusByIdsAndFromId(List<String> ids, Integer fromId, Integer status);
 
-    Boolean updateOrderItemDataByIds(List<String> ids, Long userId, String childOrderId);
+    Boolean updateOrderItemDataByIds(List<String> ids, Integer fromId, String childOrderId);
 
     int updateOrderItem(EcOrderItemData orderItemData);
 
-    Boolean updateOrderItemDataByOrderId(String orderId, Long userId);
+    Boolean updateOrderItemDataByOrderId(String orderId, Integer fromId);
 
     /**
      * 查询订单商品信息

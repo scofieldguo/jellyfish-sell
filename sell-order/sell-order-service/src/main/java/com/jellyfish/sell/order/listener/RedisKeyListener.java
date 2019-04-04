@@ -52,7 +52,7 @@ public class RedisKeyListener {
 	public RedisMessageListenerContainer redisMessageListenerContainer() {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory());
-		container.addMessageListener(listenerAdapter(), new PatternTopic("__keyevent@10__:expired"));
+		container.addMessageListener(listenerAdapter(), new PatternTopic("__keyevent@0__:expired"));
 		return container;
 	}
 	

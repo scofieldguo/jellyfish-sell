@@ -28,7 +28,7 @@ public interface EcOrderDataMapper extends BaseMapper<EcOrderData> {
 
     Integer updateByIdAndFromId(EcOrderData orderData);
 
-    EcOrderData findOrderDataByIdAndUserId(@Param("id") String id, @Param("userId") Long userId);
+    EcOrderData findOrderDataByIdAndFromId(@Param("id") String id, @Param("fromId") Integer fromId);
 
     Integer updateOrderToPay(EcOrderData orderData);
 

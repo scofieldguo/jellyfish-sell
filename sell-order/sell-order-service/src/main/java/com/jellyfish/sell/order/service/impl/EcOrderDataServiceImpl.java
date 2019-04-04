@@ -8,8 +8,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.codingapi.tx.annotation.TxTransaction;
 import com.jellyfish.sell.db.redis.RedisBean;
-import com.jellyfish.sell.order.bean.OrderFromEnum;
-import com.jellyfish.sell.order.bean.OrderItemMapValue;
 import com.jellyfish.sell.order.bean.PayTypeEnum;
 import com.jellyfish.sell.order.bean.PlaceOrderData;
 import com.jellyfish.sell.order.entity.EcOrderData;
@@ -29,7 +27,6 @@ import com.jellyfish.sell.support.DateUtils;
 import com.jellyfish.sell.support.ExeclUtil;
 import com.jellyfish.sell.support.OrderUtil;
 import com.jellyfish.sell.support.wechat.proto.IWeChatService;
-import com.jellyfish.sell.user.entity.UserData;
 import com.jellyfish.sell.user.service.IUserDataService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -38,9 +35,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -142,23 +137,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     }
 
 
-    @Override
-    @Transactional
-    public Boolean updateOrderToPayOver(EcOrderData orderData) {
-        // TODO Auto-generated method stub
-        // 更新订单状态
-        String orderId = orderData.getId();
-        String userIdStr = orderId.substring(21, orderId.length());
-        Long userId = Long.valueOf(userIdStr);
-        orderData.setUserId(userId);
-        int count = baseMapper.updateOrderToPayOver(orderData);
-        if (count > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 
     private Long getPayTime(String orderId) {
         Long payTime = getOrderPayTime(orderId);
@@ -182,41 +160,40 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     }
 
 
-    private Boolean writeOrderHelpTime(String orderId) {
-        String key = ORDER_HELP_KEY + "_" + orderId;
-        return redisBean.setNXStringTime(key, orderId, 2 * 3600L, RedisBean.KEY_EXPIRED_LISTEN);
-    }
-
-    private Long getOrderHelpTime(String orderId) {
-        String key = ORDER_HELP_KEY + "_" + orderId;
-        return redisBean.ttlKey(key, RedisBean.KEY_EXPIRED_LISTEN);
-    }
 
     @Override
     public Boolean writeOrderPayTime(String orderId) {
         String key = ORDER_PAY_KEY + "_" + orderId;
-        return redisBean.setNXStringTime(key, orderId, TimeUnit.HOURS.toSeconds(24), RedisBean.KEY_EXPIRED_LISTEN);
+        return redisBean.setNXStringTime(key, orderId, TimeUnit.HOURS.toSeconds(24), RedisBean.DEFAULT);
     }
 
     @Override
     public Long getOrderPayTime(String orderId) {
         String key = ORDER_PAY_KEY + "_" + orderId;
-        return redisBean.ttlKey(key, RedisBean.KEY_EXPIRED_LISTEN);
+        return redisBean.ttlKey(key, RedisBean.DEFAULT);
     }
 
     @Override
     public Boolean delOrderPayTime(String orderId) {
         String key = ORDER_PAY_KEY + "_" + orderId;
-        Long l = redisBean.delByKey(key, RedisBean.KEY_EXPIRED_LISTEN);
+        Long l = redisBean.delByKey(key, RedisBean.DEFAULT);
         return l > 0 ? true : false;
     }
 
     @Override
-    public Boolean delOrderHelpTime(String orderId) {
-        String key = ORDER_HELP_KEY + "_" + orderId;
-        Long l = redisBean.delByKey(key, RedisBean.KEY_EXPIRED_LISTEN);
-        return l > 0 ? true : false;
+    public Boolean updateOrderToPayOver(EcOrderData orderData) {
+        String orderId = orderData.getId();
+        String fromIdStr = orderId.substring(21, orderId.length());
+        Integer fromId = Integer.valueOf(fromIdStr);
+        orderData.setFromId(fromId);
+        int count = baseMapper.updateOrderToPayOver(orderData);
+        if (count > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
     /**
      * 订单分页查询
@@ -314,14 +291,13 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     @Override
     public EcOrderData findByOrderId(String orderId) {
         // TODO Auto-generated method stub
-        String userIdStr = orderId.substring(21, orderId.length());
-        Long userId = Long.valueOf(userIdStr);
-        EcOrderData orderData = baseMapper.findOrderDataByIdAndUserId(orderId, userId);
+        String fromIdStr = orderId.substring(21, orderId.length());
+        Integer fromId = Integer.valueOf(fromIdStr);
+        EcOrderData orderData = baseMapper.findOrderDataByIdAndFromId(orderId, fromId);
         if (orderData == null) {
             return null;/**/
         }
         orderData.setOrderPayTime(getPayTime(orderId));
-        orderData.setOrderHelpTime(getOrderHelpTime(orderId));
         return orderData;
     }
 
@@ -332,9 +308,9 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         orderData.setId(orderId);
         orderData.setModifyTime(new Date());
         orderData.setPayStatus(EcOrderData.ORDER_PAY_STATUS_FAIL);
-        String userIdStr = orderId.substring(21, orderId.length());
-        Long userId = Long.valueOf(userIdStr);
-        orderData.setUserId(userId);
+        String fromIdStr = orderId.substring(21, orderId.length());
+        Integer fromId = Integer.valueOf(fromIdStr);
+        orderData.setFromId(fromId);
         int count = baseMapper.updateOrderToCancel(orderData);
         if (count > 0) {
             delOrderPayTime(orderId);
@@ -360,7 +336,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     public String getBeforeOrderCount(Integer day, Map<String, Object> params) {
         // 昨日订单统计
         final String BEFOREOR_ORDER_COUNT = "BEFOREOR_ORDER_COUNT";
-        String res = redisBean.get(BEFOREOR_ORDER_COUNT, RedisBean.KEY_EXPIRED_LISTEN);
+        String res = redisBean.get(BEFOREOR_ORDER_COUNT, RedisBean.DEFAULT);
         // 2标识手动刷新数据
         if (("2".equals(params.get("type")) || StringUtils.isBlank(res))) {
             Map<String, Object> map = new HashMap<>(8);
@@ -387,19 +363,19 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
             map.put("delOrderCount", delOrderCount);
 
             String result = JSONObject.parseObject(JSON.toJSONString(map)).toJSONString();
-            redisBean.setNXStringTime(BEFOREOR_ORDER_COUNT, result, 60L, RedisBean.KEY_EXPIRED_LISTEN);
+            redisBean.setNXStringTime(BEFOREOR_ORDER_COUNT, result, 60L, RedisBean.DEFAULT);
 
             return result;
         } else {
-            return redisBean.get(BEFOREOR_ORDER_COUNT, RedisBean.KEY_EXPIRED_LISTEN);
+            return redisBean.get(BEFOREOR_ORDER_COUNT, RedisBean.DEFAULT);
 
         }
     }
 
-    public List<EcOrderData> findChildOrders(String orderId, Long userId) {
+    public List<EcOrderData> findChildOrders(String orderId, Integer fromId) {
         QueryWrapper<EcOrderData> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("parent_id", orderId);
-        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("from_id", fromId);
         return this.list(queryWrapper);
     }
 
@@ -407,9 +383,9 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     public Boolean updateOrderToPayIng(EcOrderData orderData) {
         // TODO Auto-generated method stub
         String orderId = orderData.getId();
-        String userIdStr = orderId.substring(21, orderId.length());
-        Long userId = Long.valueOf(userIdStr);
-        orderData.setUserId(userId);
+        String fromIdStr = orderId.substring(21, orderId.length());
+        Integer fromId = Integer.valueOf(fromIdStr);
+        orderData.setFromId(fromId);
         int count = baseMapper.updateOrderToPay(orderData);
         if (count > 0) {
             return true;
@@ -445,9 +421,8 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         if (ecPayOrder.getStatus() == EcPayOrder.STATUS_SUCCESS) {
             int line = ecPayOrderService.updatePayOrder(ecPayOrder);
             if (line > 0) {
-                Long userId = orderData.getUserId();
                 String orderId = orderData.getId();
-                List<EcOrderData> childOrders = findChildOrders(orderId, userId);
+                List<EcOrderData> childOrders = findChildOrders(orderId, orderData.getFromId());
                 orderData.setPayOrder(ecPayOrder.getOutTradeNo());
                 orderData.setPrepayId(ecPayOrder.getPrepayId());
                 orderData.setPayStatus(EcOrderData.ORDER_PAY_STATUS_SUCCESS);
@@ -489,7 +464,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         Date now = new Date();
         Long userId = orderData.getUserId();
         String orderId = orderData.getId();
-        List<EcOrderData> childOrders = findChildOrders(orderId, userId);
+        List<EcOrderData> childOrders = findChildOrders(orderId, orderData.getFromId());
         orderData.setPayStatus(EcOrderData.ORDER_PAY_STATUS_SUCCESS);
         orderData.setLogisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
         orderData.setPayTime(now);

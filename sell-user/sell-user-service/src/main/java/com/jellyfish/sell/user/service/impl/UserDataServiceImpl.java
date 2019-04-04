@@ -33,7 +33,7 @@ public class UserDataServiceImpl extends ServiceImpl<UserDataMapper, UserData> i
     @Override
     public Integer findFromIdByOpenId(String openId) {
         String key= USER_SESSION_KEY+openId;
-        String result =  redisBean.get(key,RedisBean.KEY_EXPIRED_LISTEN);
+        String result =  redisBean.get(key,RedisBean.DEFAULT);
         if(result == null){
             return null;
         }else{
@@ -44,13 +44,13 @@ public class UserDataServiceImpl extends ServiceImpl<UserDataMapper, UserData> i
     @Override
     public Boolean wirteUserFromId(String openId, Integer fromId, Long time) {
         String key= USER_SESSION_KEY+openId;
-        return redisBean.addStringTime(key,fromId.toString(),time,RedisBean.KEY_EXPIRED_LISTEN);
+        return redisBean.addStringTime(key,fromId.toString(),time,RedisBean.DEFAULT);
     }
 
     @Override
     public Boolean deleteUserByOpenId(String openId) {
         String key= USER_SESSION_KEY+openId;
-        redisBean.delByKey(key,RedisBean.KEY_EXPIRED_LISTEN);
+        redisBean.delByKey(key,RedisBean.DEFAULT);
         return true;
     }
 }

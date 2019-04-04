@@ -25,10 +25,8 @@ public class Receiver {
 
 	@Autowired
 	 private LottoOrderMqProducerService lottoOrderMqProducerService;
-	@Autowired/*(check = false)*/
+	@Autowired
 	private IEcProductSkuDataService ecProductSkuDataService;
-//	@Autowired
-//	private WxConfig wxConfig;
 	@Autowired
 	private MqConfig mqConfig;
 
@@ -39,72 +37,17 @@ public class Receiver {
 			return;
 		}
 		String orderId = arg[2];
-		if (arg[1].equals(IEcOrderDataService.TYPE_HELP_KEY)) {
-		} else if (arg[1].equals(IEcOrderDataService.TYPE_PAY_KEY)) {
-			sendMsg(2, orderId);
-			sendMsgToLotto(orderId);
+		if (arg[1].equals(IEcOrderDataService.TYPE_PAY_KEY)) {
+			sendMsg( orderId);
 		} else {
 			return;
 		}
-		// OrderData orderData = new OrderData();
-		// orderData.setModifyTime(new Date());
-
-		// OrderData oldOrder = orderDataService.findByOrderId(orderId);
-		// orderData.setId(orderId);
-		// orderData.setModifyTime(new Date());
-		// if(arg[1].equals(IOrderDataService.TYPE_HELP_KEY)) {
-		// if(oldOrder.getStatus() == OrderData.ORDER_STATUS_HELPING) {
-		// orderData.setStatus(OrderData.ORDER_PAY_STATUS_ING);
-		// orderData.setPayStatus(OrderData.ORDER_PAY_STATUS_ING);
-		// }
-		// if(oldOrder.getHelpStatus() == OrderData.ORDER_HELP_STATUS_ING) {
-		// orderData.setHelpStatus(OrderData.ORDER_HELP_STATUS_FAIL);
-		// }
-		// orderDataService.writeOrderPayTime(orderId);
-		// }else if(arg[1].equals(IOrderDataService.TYPE_PAY_KEY)) {
-		// if(oldOrder.getStatus() == OrderData.ORDER_PAY_STATUS_ING) {
-		// orderData.setStatus(OrderData.ORDER_STATUS_CANCEL);
-		// }
-		// }else {
-		// return;
-		// }
-		// orderDataService.updateOrder(orderData);
-		// if(oldOrder.getShareId()!=null && !"".equals(oldOrder.getShareId())) {
-		// shareDataService.updateStatus(oldOrder.getShareId(), ShareData.STATUS_FAIL);
-		// }
 	}
 
-//	public void sendWxMessage(EcOrderData oldOrder) {
-//		WeixinTemplate.Builder builder = new WeixinTemplate.Builder();
-//		Data.Builder dataBuilder = new Data.Builder();
-//		EcProductSkuData productSkuData = ecProductSkuDataService.getById(oldOrder.getSkuid());
-//		Double money = oldOrder.getProductPrice() * oldOrder.getProductNum();
-//		String key = "订单包邮！点击进入订单页完成支付";
-//		if (oldOrder.getType() == EcOrderData.ORDER_TYPE_HELP
-//				&& oldOrder.getHelpStatus() != EcOrderData.ORDER_HELP_STATUS_SUCCESS) {
-//			money = money + oldOrder.getPostPrice();
-//			key ="订单含运费"+oldOrder.getPostPrice()+"元！点击进入订单页完成支付";
-//
-//		}
-//		builder.setTouser(userData.getOpenId()).setTemplate_id(wxConfig.getWxTemplatePrepay())
-//				.setForm_id(oldOrder.getFormId()).setPage("pages/load/load");
-//		dataBuilder.setKeyword1(oldOrder.getId()).setKeyword2(productSkuData.getSkuName())
-//				.setKeyword3(oldOrder.getProductNum() + "").setKeyword4(money + "元").setKeyword5("请在15分钟内完成支付")
-//				.setKeyword6(key);
-//		builder.setData(dataBuilder.build());
-//		weChatService.sendTemlate(JSON.toJSONString(builder.build()));
-//	}
 
-	public void sendMsg(Integer type, String orderId) {
+	public void sendMsg( String orderId) {
 		Message message = new Message(mqConfig.getTopic(), MqConfig.ORDER, orderId.getBytes());
 		mqProducerService.sendMessage(message);
 	}
 
-	public void sendMsgToLotto(String orderId){
-        EcOrderData oldOrder = ecOrderDataService.findByOrderId(orderId);
-        if(oldOrder.getFromId().intValue() == OrderFromEnum.LOTTO.getType().intValue()) {
-            Message message = new Message(mqConfig.getLottoCancelOrderTopic(), MqConfig.ORDERCANCEL, orderId.getBytes());
-            lottoOrderMqProducerService.sendMessage(message);
-        }
-	}
 }

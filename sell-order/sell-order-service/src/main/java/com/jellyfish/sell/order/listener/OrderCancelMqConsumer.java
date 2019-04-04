@@ -24,7 +24,7 @@ public class OrderCancelMqConsumer implements ApplicationRunner {
 	public void sub() {
 		List<MqConsumerService.Subscribe> list = new ArrayList<Subscribe>();
 		System.out.println(mqConfig.getTopic());
-		String tags = MqConfig.ORDER+"||"+MqConfig.REFUND;
+		String tags = MqConfig.ORDER;
 		list.add(new MqConsumerService.Subscribe(mqConfig.getTopic(),tags,orderCancelMqListener ));
 		mqConsumerService.subscribe(list);
 	}
