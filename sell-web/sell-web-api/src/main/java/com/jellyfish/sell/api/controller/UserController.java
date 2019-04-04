@@ -41,7 +41,6 @@ public class UserController {
     private IWeChatService weChatService;
 
     private static Logger logger = LoggerFactory.getLogger(UserController.class);
-    private static Logger accessLog = LoggerFactory.getLogger("accesslog");
     @Autowired
     private GlobalConfig globalConfig;
 
@@ -65,7 +64,7 @@ public class UserController {
             if(fromId != null){
                 userDataService.wirteUserFromId(openId,fromId,12*3600L);
             }
-            return ResultUtil.builderSuccessResult("", "登陆成功");
+            return ResultUtil.builderSuccessResult(openId, "登陆成功");
         } catch (Exception e) {
             e.printStackTrace();
         }

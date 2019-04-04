@@ -3,9 +3,14 @@
 <mapper namespace="com.jellyfish.sell.product.mapper.EcProductSpuDataMapper">
 	<sql id="table">tb_product_spu_data</sql>
 	<select id="findByIdForView" resultType="com.jellyfish.sell.product.entity.EcProductSpuData">
-		select id,name,product_desc,line_price,list_price,product_unit,primary_pic_url,list_pic_url,detail_pic_url,share_pic_url,shop_id,cross_border from <include refid="table" />
+		select id,name,product_desc,line_price,list_price,product_unit,primary_pic_url,list_pic_url,detail_pic_url,share_pic_url,shop_id,sell_cnt from <include refid="table" />
 		<where>
 			id = #{id}
 		</where>
 	</select>
+	<update id="addSellCnt" >
+		update <include refid="table" />
+		set sell_cnt = sell_cnt+1
+		where id #{id}
+	</update>
 </mapper>

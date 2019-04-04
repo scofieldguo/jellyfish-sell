@@ -35,4 +35,6 @@ public interface IEcProductSpuDataService extends IService<EcProductSpuData> {
 
     EcProductSpuData findById(Long pid);
 
+    Boolean addSellCnt(Long pid);
+
 }

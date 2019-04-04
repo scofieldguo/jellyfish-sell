@@ -46,4 +46,11 @@ public class UserDataServiceImpl extends ServiceImpl<UserDataMapper, UserData> i
         String key= USER_SESSION_KEY+openId;
         return redisBean.addStringTime(key,fromId.toString(),time,RedisBean.KEY_EXPIRED_LISTEN);
     }
+
+    @Override
+    public Boolean deleteUserByOpenId(String openId) {
+        String key= USER_SESSION_KEY+openId;
+        redisBean.delByKey(key,RedisBean.KEY_EXPIRED_LISTEN);
+        return true;
+    }
 }

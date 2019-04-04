@@ -13,4 +13,6 @@ public interface IUserDataService extends IService<UserData> {
 
     Boolean wirteUserFromId(String openId,Integer fromId,Long time);
 
+    Boolean deleteUserByOpenId(String openId);
+
 }

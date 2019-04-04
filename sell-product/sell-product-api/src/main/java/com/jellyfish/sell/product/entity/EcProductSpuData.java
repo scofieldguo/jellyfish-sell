@@ -77,9 +77,9 @@ public class EcProductSpuData implements Serializable {
     private Long shopId;
 
     /**
-     * 跨境 1:普通 2：跨境
+     * 销量
      */
-    private Integer crossBorder;
+    private Long sellCnt;
 
     @TableField(exist = false)
     private List<EcProductAttribute> specs;

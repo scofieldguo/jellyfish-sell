@@ -117,4 +117,9 @@ public class EcProductSpuDataServiceImpl extends ServiceImpl<EcProductSpuDataMap
     public EcProductSpuData findById(Long pid) {
         return this.baseMapper.selectById(pid);
     }
+
+    @Override
+    public Boolean addSellCnt(Long pid) {
+        return null;
+    }
 }
