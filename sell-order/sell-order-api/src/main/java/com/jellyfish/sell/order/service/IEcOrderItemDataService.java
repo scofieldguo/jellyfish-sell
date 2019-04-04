@@ -15,7 +15,7 @@ public interface IEcOrderItemDataService extends IService<EcOrderItemData> {
 
     Integer countByOrderIdAndChildOrderIdAndUserId(String orderId, String childOrderId, Long userId);
 
-    List<EcOrderItemData> findByOrderIdAndChildOrderIdAndUserId(String orderId, String childOrderId, Long userId);
+    List<EcOrderItemData> findByOrderIdAndChildOrderIdAndFromId(String orderId, String childOrderId, Integer fromId);
 
     Boolean updateRefundIngStatusByIdsAndUserId(List<String> ids, Long userId, Integer status);
 

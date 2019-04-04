@@ -166,6 +166,11 @@ public class EcOrderData implements Serializable {
 
     private String realName;
 
+    /**
+     * 付款方式
+     * */
+    private Integer payType;
+
     @TableField(exist = false)
     private Long orderHelpTime;
     @TableField(exist = false)
@@ -212,6 +217,7 @@ public class EcOrderData implements Serializable {
         this.logisticStatus = builder.logisticStatus;
         this.fromId = builder.fromId;
         this.realName =builder.realName;
+        this.payType=builder.payType;
     }
 
     public static class Builder {
@@ -273,6 +279,7 @@ public class EcOrderData implements Serializable {
 
         private Integer logisticStatus;
 
+        private Integer payType;
 
         public Builder(String id, Long userId,Integer fromId) {
             this.id = id;
@@ -326,6 +333,11 @@ public class EcOrderData implements Serializable {
 
         public Builder logisticStatus(Integer logisticStatus) {
             this.logisticStatus = logisticStatus;
+            return this;
+        }
+
+        public Builder payType(Integer payType){
+            this.payType=payType;
             return this;
         }
 

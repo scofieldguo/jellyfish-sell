@@ -56,7 +56,7 @@
         </where>
     </select> -->
 
-    <update id="updateByIdAndUserId" parameterType="com.jellyfish.sell.order.entity.EcOrderData">
+    <update id="updateByIdAndFromId" parameterType="com.jellyfish.sell.order.entity.EcOrderData">
         update
         <include refid="table"/>
         <set>
@@ -93,7 +93,7 @@
         </set>
         <where>
             id = #{id}
-            and user_id = #{userId}
+            and from_id = #{fromId}
         </where>
     </update>
 
