@@ -7,7 +7,6 @@ import com.jellyfish.sell.order.entity.EcOrderData;
 import com.jellyfish.sell.order.entity.EcOrderItemData;
 import com.jellyfish.sell.order.entity.EcPayOrder;
 import com.jellyfish.sell.order.service.IEcOrderDataService;
-import com.jellyfish.sell.order.service.IEcOrderItemDataService;
 import com.jellyfish.sell.order.service.IEcPayOrderService;
 import com.jellyfish.sell.product.entity.EcProductSkuData;
 import com.jellyfish.sell.product.entity.EcProductSpuData;
@@ -38,8 +37,6 @@ public class OrderController {
     private IEcProductSpuDataService ecProductSpuDataService;
     @Autowired
     private IUserDataService userDataService;
-    @Autowired
-    private IEcOrderItemDataService ecOrderItemDataService;
     @Autowired
     private IEcPayOrderService ecPayOrderService;
     @Autowired

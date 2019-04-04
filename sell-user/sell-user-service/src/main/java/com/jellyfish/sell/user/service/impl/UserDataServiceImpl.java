@@ -35,7 +35,7 @@ public class UserDataServiceImpl extends ServiceImpl<UserDataMapper, UserData> i
         String key= USER_SESSION_KEY+openId;
         String result =  redisBean.get(key,RedisBean.DEFAULT);
         if(result == null){
-            return null;
+            return 1000;
         }else{
             return Integer.valueOf(result);
         }

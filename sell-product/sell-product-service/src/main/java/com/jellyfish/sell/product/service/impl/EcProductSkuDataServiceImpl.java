@@ -2,7 +2,6 @@ package com.jellyfish.sell.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.codingapi.tx.annotation.TxTransaction;
 import com.jellyfish.sell.product.entity.EcProductSkuData;
 import com.jellyfish.sell.product.entity.EcProductSpec;
 import com.jellyfish.sell.product.mapper.EcProductSkuDataMapper;
@@ -45,7 +44,6 @@ public class EcProductSkuDataServiceImpl extends ServiceImpl<EcProductSkuDataMap
 
     @Override
     @Transactional
-    @TxTransaction
     public Boolean rollbackProduct(Long skuId, Integer rollbackCnt) {
         // TODO Auto-generated method stub
         int count = baseMapper.rollbackProduct(skuId, rollbackCnt);
@@ -57,7 +55,6 @@ public class EcProductSkuDataServiceImpl extends ServiceImpl<EcProductSkuDataMap
 
     @Override
     @Transactional
-    @TxTransaction
     public Boolean deduceProduct(Long skuId, Integer deduceCnt) {
         // TODO Auto-generated method stub
         if (!retBool(baseMapper.deduceProduct(skuId, deduceCnt))) {
@@ -86,7 +83,6 @@ public class EcProductSkuDataServiceImpl extends ServiceImpl<EcProductSkuDataMap
 
     @Override
     @Transactional
-    @TxTransaction
     public boolean removeData(Long id) {
         if (!retBool(baseMapper.rollbackSkuStatus(0, id))) {
             throw new RuntimeException("删除SKU数据失败回滚");

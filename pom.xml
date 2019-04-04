@@ -267,35 +267,6 @@
                 <version>${springloaded}</version>
             </dependency>
             <dependency>
-                <groupId>com.codingapi</groupId>
-                <artifactId>tx-client</artifactId>
-                <version>${lcn-last-version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>slf4j-log4j12</artifactId>
-                        <groupId>org.slf4j</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-simple</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-jdk14</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.codingapi</groupId>
-                <artifactId>tx-plugins-db</artifactId>
-                <version>${lcn-last-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codingapi</groupId>
-                <artifactId>transaction-dubbo</artifactId>
-                <version>${lcn-last-version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.velocity</groupId>
                 <artifactId>velocity</artifactId>
                 <version>${velocity-version}</version>

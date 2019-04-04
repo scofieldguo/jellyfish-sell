@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.codingapi.tx.annotation.TxTransaction;
 import com.jellyfish.sell.db.redis.RedisBean;
 import com.jellyfish.sell.order.bean.PayTypeEnum;
 import com.jellyfish.sell.order.bean.PlaceOrderData;
@@ -109,7 +108,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     }
 
     @Override
-    @TxTransaction
     public Boolean batchCreateOrder(EcOrderData orderData, List<EcOrderData> orderDatas, Integer type) {
         Boolean flag = this.saveBatch(orderDatas);
         if (flag) {
@@ -781,7 +779,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     }
 
     @Override
-    @TxTransaction(isStart = true)
     public JSONObject payOrder(EcOrderData orderData, String ip, String openid) {
         String nonceStr = UUID.randomUUID().toString().replace("-", "").trim();
         String out_trade_no = ecPayOrderService.createOutTradeNo(orderData.getFromId());

@@ -55,16 +55,6 @@
         </dependency>
         <dependency>
             <groupId>com.jellyfish.sell</groupId>
-            <artifactId>sell-data-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jellyfish.sell</groupId>
-            <artifactId>sell-data-service</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jellyfish.sell</groupId>
             <artifactId>sell-product-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -98,37 +88,11 @@
             <artifactId>sell-db-mq</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>com.jellyfish.sell</groupId>-->
-        <!--<artifactId>sell-wechat</artifactId>-->
-        <!--<version>1.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>com.jellyfish.sell</groupId>
-            <artifactId>sell-common-api</artifactId>
+            <artifactId>sell-db-redis</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.codingapi</groupId>
-            <artifactId>tx-plugins-db</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codingapi</groupId>
-            <artifactId>tx-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codingapi</groupId>
-            <artifactId>transaction-dubbo</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.jellyfish.sell</groupId>
-            <artifactId>sell-common-service</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jellyfish.sell</groupId>
-            <artifactId>sell-pindd</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>

@@ -1,10 +1,8 @@
 package com.jellyfish.sell.order.service.impl;
 
-import com.aliyun.openservices.shade.com.alibaba.fastjson.serializer.IntegerCodec;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.codingapi.tx.annotation.TxTransaction;
 import com.jellyfish.sell.order.entity.EcOrderData;
 import com.jellyfish.sell.order.entity.EcOrderItemData;
 import com.jellyfish.sell.order.mapper.EcOrderItemDataMapper;
@@ -71,7 +69,6 @@ public class EcOrderItemDataServiceImpl extends ServiceImpl<EcOrderItemDataMappe
     }
 
     @Override
-    @TxTransaction
     @Transactional
     public Boolean updateOrderItemDataByIds(List<String> ids, Integer fromId, String childOrderId) {
         UpdateWrapper<EcOrderItemData> wrapper = new UpdateWrapper<>(new EcOrderItemData());
@@ -85,7 +82,6 @@ public class EcOrderItemDataServiceImpl extends ServiceImpl<EcOrderItemDataMappe
 
     @Override
     @Transactional
-//    @TxTransaction
     public Boolean updateOrderItemDataByOrderId(String orderId, Integer fromId) {
         UpdateWrapper<EcOrderItemData> wrapper = new UpdateWrapper<>(new EcOrderItemData());
         wrapper.set("logistic_status", EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);

@@ -8,8 +8,8 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-@TableName("tb_product_type")
-public class EcProductType implements Serializable {
+@TableName("tb_product_put_type")
+public class EcProductPutType implements Serializable {
 
     /**
      * id

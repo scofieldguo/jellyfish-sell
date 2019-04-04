@@ -21,7 +21,6 @@ import redis.clients.jedis.JedisPoolConfig;
 
 	
 @Configuration
-//@PropertySource("classpath:redis.properties")
 public class RedisKeyListener {
 
 	@Value("${spring.redis.host}")
