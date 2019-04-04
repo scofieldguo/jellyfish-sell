@@ -83,7 +83,6 @@ public interface IEcOrderDataService extends IService<EcOrderData> {
      */
     IPage<EcOrderData> pageList(IPage pages, Map<String, Object> params);
 
-    Boolean delOrderHelpTime(String orderId);
 
     Boolean delOrderPayTime(String orderId);
 

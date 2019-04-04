@@ -6,22 +6,14 @@
 		tb_order_data
 	</sql>
 
-    <select id="findUserLastOrder" resultType="com.jellyfish.sell.order.entity.EcOrderData">
-        select * from
-        <include refid="table"/>
-        <where>
-            user_id = #{userId} and parent_id is NULL order by create_time desc limit 1
-        </where>
-    </select>
-
     <select id="pageFindByParam" resultType="com.jellyfish.sell.order.entity.EcOrderData">
         select
-        id,parent_id,user_id,product_price,post_price,pay_order,create_time,pay_status,logistic_status,logistic,logistic_company
+        id,parent_id,from_id,product_price,post_price,pay_order,create_time,pay_status,logistic_status,logistic,logistic_company
         from
         <include refid="table"/>
         <where>
-            <if test="paramMap.userId !=null">
-                and user_id = #{paramMap.userId}
+            <if test="paramMap.fromId !=null">
+                and from_id = #{paramMap.fromId}
             </if>
             <if test="paramMap.fromId !=null">
                 and from_id = #{paramMap.fromId}
@@ -128,7 +120,7 @@
         </set>
         <where>
             <![CDATA[id = #{id}
-			and user_id = #{userId}
+			and from_id = #{fromId}
 			and pay_status < 1]]>
         </where>
     </update>
@@ -161,7 +153,7 @@
         </set>
         <where>
             <![CDATA[id = #{id}
-			and user_id = #{userId}
+			and from_id = #{fromId}
 			and pay_status < 2]]>
         </where>
     </update>
@@ -199,17 +191,17 @@
         </set>
         <where>
             <![CDATA[id = #{id}
-			and user_id = #{userId}
+		    and from_id = #{fromId}
 			and pay_status < 4]]>
         </where>
     </update>
 
-    <select id="findOrderDataByIdAndUserId" resultType="com.jellyfish.sell.order.entity.EcOrderData">
+    <select id="findOrderDataByIdAndFromId" resultType="com.jellyfish.sell.order.entity.EcOrderData">
         select * from
         <include refid="table"/>
         <where>
             id = #{id}
-            and user_id =#{userId}
+            and from_id =#{fromId}
         </where>
     </select>
 

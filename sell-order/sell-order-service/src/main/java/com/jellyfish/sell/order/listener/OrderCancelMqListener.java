@@ -5,6 +5,7 @@ import com.aliyun.openservices.ons.api.ConsumeContext;
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.MessageListener;
 import com.codingapi.tx.annotation.TxTransaction;
+import com.jellyfish.sell.order.bean.PayTypeEnum;
 import com.jellyfish.sell.order.entity.EcOrderData;
 import com.jellyfish.sell.order.entity.EcOrderItemData;
 import com.jellyfish.sell.order.service.IEcOrderDataService;
@@ -55,8 +56,13 @@ public class OrderCancelMqListener implements MessageListener {
 	@TxTransaction(isStart = true)
 	@Transactional
 	public Boolean handleOrder(EcOrderData oldOrder) {
-		String orderId = oldOrder.getId();
 		Date now = new Date();
+		String orderId = oldOrder.getId();
+		oldOrder.setPayType(PayTypeEnum.PAY_TYPE_COD.getType());
+		oldOrder.setLogisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
+		oldOrder.setModifyTime(now);
+		ecOrderDataService.updateOrder(oldOrder);
+		ecOrderItemDataService.updateOrderItemDataByOrderId(orderId,oldOrder.getFromId());
 		return true;
 	}
 
