@@ -14,13 +14,10 @@
     <dubbo:service protocol="dubbo"
                    interface="com.jellyfish.sell.support.wechat.proto.IWeChatService" ref="weChatService"
                    timeout="30000" >
-        <dubbo:method name="decryptData" retries="0"></dubbo:method>
         <dubbo:method name="sendTemlate" retries="0"></dubbo:method>
         <dubbo:method name="getPrepayId" retries="0"></dubbo:method>
         <dubbo:method name="refund" retries="0"></dubbo:method>
         <dubbo:method name="wxPayToChange" retries="0"></dubbo:method>
         <dubbo:method name="cashCoupon" retries="0"></dubbo:method>
-    </dubbo:service>
-    <dubbo:service protocol="dubbo" interface="com.jellyfish.sell.support.wechat.proto.IWxSendTemplate" ref="wxSendTemplate" timeout="30000" retries="0">
     </dubbo:service>
 </beans>

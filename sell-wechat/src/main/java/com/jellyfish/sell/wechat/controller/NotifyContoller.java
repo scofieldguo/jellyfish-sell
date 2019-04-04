@@ -31,7 +31,7 @@ public class NotifyContoller {
 
     private static Logger orderLog= LoggerFactory.getLogger("orderlog");
     private static Logger logger= LoggerFactory.getLogger(NotifyContoller.class);
-    
+
     @Autowired
     private IWeChatService weChatService;
     @Autowired

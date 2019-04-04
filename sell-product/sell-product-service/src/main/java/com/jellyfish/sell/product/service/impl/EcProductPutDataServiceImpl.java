@@ -23,6 +23,6 @@ public class EcProductPutDataServiceImpl extends ServiceImpl<EcProductPutDataMap
 
     @Override
     public EcProductPutData findById(Long id) {
-        return this.findById(id);
+        return baseMapper.selectById(id);
     }
 }

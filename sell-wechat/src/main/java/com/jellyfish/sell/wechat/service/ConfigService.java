@@ -2,7 +2,6 @@ package com.jellyfish.sell.wechat.service;
 
 import com.jellyfish.sell.support.wechat.proto.IWeChatTokenRedis;
 import com.jellyfish.sell.wechat.config.WxConfig;
-import com.jellyfish.sell.wechat.controller.NotifyContoller;
 import com.jellyfish.sell.wechat.util.WxUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,7 @@ import java.util.Date;
 
 @Service("configService")
 public class ConfigService {
-	private static Logger logger= LoggerFactory.getLogger(NotifyContoller.class);
+	private static Logger logger= LoggerFactory.getLogger(ConfigService.class);
 	@Autowired
 	private IWeChatTokenRedis weChatTokenRedis;
 	@Autowired
@@ -32,5 +31,5 @@ public class ConfigService {
 		logger.info(String.format("access_token=%s",access_token));
 		return access_token;
 	}
-	
+
 }

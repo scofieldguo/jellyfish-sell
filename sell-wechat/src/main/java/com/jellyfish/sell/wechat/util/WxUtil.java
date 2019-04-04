@@ -1,20 +1,12 @@
 package com.jellyfish.sell.wechat.util;
 
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import com.jellyfish.sell.support.HttpUtil;
-import com.jellyfish.sell.user.entity.WechatUser;
-import com.jellyfish.sell.wechat.controller.NotifyContoller;
 import com.alibaba.fastjson.JSONObject;
+import com.jellyfish.sell.support.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URLEncoder;
+import java.util.*;
 
 public class WxUtil {
     private static Logger LOG = LoggerFactory.getLogger(WxUtil.class);
@@ -71,69 +63,69 @@ public class WxUtil {
         return map;
     }
 
-    /**
-     * 拉取用户信息
-     * 网页授权作用域：snsapi_userinfo
-     *
-     * @param access_token
-     * @param openid
-     * @return
-     */
-    public static WechatUser getUserInfo(String access_token, String openid) {
-        StringBuffer sb = new StringBuffer("https://api.weixin.qq.com/sns/userinfo?");
-        sb.append("access_token=").append(access_token)
-                .append("&").append("openid=").append(openid)
-                .append("&").append("lang=").append("zh_CN");//lang:返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
-
-        JSONObject json = HttpUtil.httpGetUrl(sb.toString());
-        if (json.getIntValue("errcode") != 0) {
-            LOG.error("get weixin userinfo error:" + json.getIntValue("errcode"));
-            return null;
-        }
-        WechatUser user = new WechatUser();
-        user.setOpenId(openid);
-        user.setNickname(WxUtil.urlEnodeUTF8(json.getString("nickname")));
-        String sex = json.getString("sex");
-        user.setSex("1".equals(sex) ? WechatUser.SEX_MALE : ("2".equals(sex) ? WechatUser.SEX_FEMALE : WechatUser.SEX_UNKNOWN));
-        user.setCountry(json.getString("country"));
-        user.setProvince(json.getString("province"));
-        user.setCity(json.getString("city"));
-        user.setHeadimgurl(json.getString("headimgurl"));
-        user.setIntime(new Date());
-        return user;
-    }
-
-    /**
-     * UnionID机制获取用户基本信息
-     */
-    public static WechatUser getUserInfoByUnionId(String access_token, String openid) {
-        StringBuffer sb = new StringBuffer("https://api.weixin.qq.com/cgi-bin/user/info?");
-        sb.append("access_token=").append(access_token)
-                .append("&").append("openid=").append(openid)
-                .append("&").append("lang=").append("zh_CN");//lang:返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
-        JSONObject json = HttpUtil.httpGetUrl(sb.toString());
-        LOG.info("wechatUser==="+json.toJSONString());
-        if (json.getIntValue("errcode") != 0) {
-            LOG.info("get weixin userinfo error:" + json.getIntValue("errcode"));
-            return null;
-        }
-        WechatUser user = new WechatUser();
-        user.setOpenId(openid);
-        user.setUnionId(json.getString("unionid"));
-        if (null != json.getString("nickname") && !"".equals(json.getString("nickname").trim())) {
-            user.setNickname(WxUtil.urlEnodeUTF8(json.getString("nickname")));
-        }
-        String sex = json.getString("sex");
-        user.setSex("1".equals(sex) ? WechatUser.SEX_MALE : ("2".equals(sex) ? WechatUser.SEX_FEMALE : WechatUser.SEX_UNKNOWN));
-        user.setCountry(json.getString("country"));
-        user.setProvince(json.getString("province"));
-        user.setCity(json.getString("city"));
-        user.setHeadimgurl(json.getString("headimgurl"));
-        Integer subscribe = json.getInteger("subscribe");
-        user.setFlag(subscribe == 1 ? WechatUser.FLAG_SUBSCRIBE : WechatUser.FLAG_UNSUBSCRIBE);
-        user.setIntime(new Date());
-        return user;
-    }
+//    /**
+//     * 拉取用户信息
+//     * 网页授权作用域：snsapi_userinfo
+//     *
+//     * @param access_token
+//     * @param openid
+//     * @return
+//     */
+//    public static WechatUser getUserInfo(String access_token, String openid) {
+//        StringBuffer sb = new StringBuffer("https://api.weixin.qq.com/sns/userinfo?");
+//        sb.append("access_token=").append(access_token)
+//                .append("&").append("openid=").append(openid)
+//                .append("&").append("lang=").append("zh_CN");//lang:返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
+//
+//        JSONObject json = HttpUtil.httpGetUrl(sb.toString());
+//        if (json.getIntValue("errcode") != 0) {
+//            LOG.error("get weixin userinfo error:" + json.getIntValue("errcode"));
+//            return null;
+//        }
+//        WechatUser user = new WechatUser();
+//        user.setOpenId(openid);
+//        user.setNickname(WxUtil.urlEnodeUTF8(json.getString("nickname")));
+//        String sex = json.getString("sex");
+//        user.setSex("1".equals(sex) ? WechatUser.SEX_MALE : ("2".equals(sex) ? WechatUser.SEX_FEMALE : WechatUser.SEX_UNKNOWN));
+//        user.setCountry(json.getString("country"));
+//        user.setProvince(json.getString("province"));
+//        user.setCity(json.getString("city"));
+//        user.setHeadimgurl(json.getString("headimgurl"));
+//        user.setIntime(new Date());
+//        return user;
+//    }
+//
+//    /**
+//     * UnionID机制获取用户基本信息
+//     */
+//    public static WechatUser getUserInfoByUnionId(String access_token, String openid) {
+//        StringBuffer sb = new StringBuffer("https://api.weixin.qq.com/cgi-bin/user/info?");
+//        sb.append("access_token=").append(access_token)
+//                .append("&").append("openid=").append(openid)
+//                .append("&").append("lang=").append("zh_CN");//lang:返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
+//        JSONObject json = HttpUtil.httpGetUrl(sb.toString());
+//        LOG.info("wechatUser==="+json.toJSONString());
+//        if (json.getIntValue("errcode") != 0) {
+//            LOG.info("get weixin userinfo error:" + json.getIntValue("errcode"));
+//            return null;
+//        }
+//        WechatUser user = new WechatUser();
+//        user.setOpenId(openid);
+//        user.setUnionId(json.getString("unionid"));
+//        if (null != json.getString("nickname") && !"".equals(json.getString("nickname").trim())) {
+//            user.setNickname(WxUtil.urlEnodeUTF8(json.getString("nickname")));
+//        }
+//        String sex = json.getString("sex");
+//        user.setSex("1".equals(sex) ? WechatUser.SEX_MALE : ("2".equals(sex) ? WechatUser.SEX_FEMALE : WechatUser.SEX_UNKNOWN));
+//        user.setCountry(json.getString("country"));
+//        user.setProvince(json.getString("province"));
+//        user.setCity(json.getString("city"));
+//        user.setHeadimgurl(json.getString("headimgurl"));
+//        Integer subscribe = json.getInteger("subscribe");
+//        user.setFlag(subscribe == 1 ? WechatUser.FLAG_SUBSCRIBE : WechatUser.FLAG_UNSUBSCRIBE);
+//        user.setIntime(new Date());
+//        return user;
+//    }
 
     /**
      * 验证SHA1签名
