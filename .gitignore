@@ -1,0 +1,16 @@
+*.iws
+*.iml
+*.ipr
+*.lock
+target/
+.settings
+.project
+.classpath
+.idea/
+.externalToolBuilders
+*.class
+*svn/
+*.log
+~*
+/.idea/
+/*.iml
