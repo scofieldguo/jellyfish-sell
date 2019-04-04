@@ -563,6 +563,9 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
                 ecOrderData.setDirection(direction);
                 ecOrderData.setCity(city);
                 ecOrderData.setArea(area);
+                if (payType==PayTypeEnum.PAY_TYPE_COD.getType().intValue()){
+                    ecOrderData.setLogisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
+                }
                 orderData.setRealName(realName);
                 childOrders.add(ecOrderData);
                 for (EcOrderItemData orderItemData : entry.getValue().getOrderItemDatas()) {
@@ -596,6 +599,9 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         orderData.setPostCode(postCode);
         orderData.setRealName(realName);
         orderData.setPayType(payType);
+        if (payType==PayTypeEnum.PAY_TYPE_COD.getType().intValue()){
+            orderData.setLogisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
+        }
         return new PlaceOrderData(orderData, orderItemDatas, childOrders);
     }
 
