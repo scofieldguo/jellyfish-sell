@@ -26,7 +26,7 @@ public interface EcOrderDataMapper extends BaseMapper<EcOrderData> {
 
     Long selBeforMoneyCount(@Param("paramMap") Map<String, Object> paramMap);
 
-    Integer updateByIdAndUserId(EcOrderData orderData);
+    Integer updateByIdAndFromId(EcOrderData orderData);
 
     EcOrderData findOrderDataByIdAndUserId(@Param("id") String id, @Param("userId") Long userId);
 

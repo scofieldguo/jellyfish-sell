@@ -9,9 +9,9 @@ public interface IEcPayOrderService extends IService<EcPayOrder> {
 
     EcPayOrder findPayOrderByTradeNo(String out_trade_no);
 
-    EcPayOrder createEcPayOrder(OrderFromEnum orderFromEnum, String outTradeNo, Long userId, String orderId, Integer money, String prepayId);
+    EcPayOrder createEcPayOrder(Integer fromId, String outTradeNo, Long userId, String orderId, Integer money, String prepayId);
 
-    String createOutTradeNo(OrderFromEnum orderFromEnum, Long userId);
+    String createOutTradeNo(Integer fromId);
 
     int updatePayOrder(EcPayOrder payOrder);
 

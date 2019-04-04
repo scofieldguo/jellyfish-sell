@@ -32,11 +32,11 @@ public class EcPayOrderServiceImpl extends ServiceImpl<EcPayOrderMapper, EcPayOr
     }
 
     @Override
-    public EcPayOrder createEcPayOrder(OrderFromEnum orderFromEnum, String outTradeNo,  Long userId,String orderId,Integer money,String prepayId) {
+    public EcPayOrder createEcPayOrder(Integer fromId, String outTradeNo,  Long userId,String orderId,Integer money,String prepayId) {
         Date now = new Date();
         EcPayOrder ecPayOrder = new EcPayOrder();
         ecPayOrder.setStatus(EcPayOrder.STATUS_ING);
-        ecPayOrder.setFromId(orderFromEnum.getType());
+        ecPayOrder.setFromId(fromId);
         ecPayOrder.setOrderId(orderId);
         ecPayOrder.setUserId(userId);
         ecPayOrder.setMoney(money);
@@ -47,8 +47,8 @@ public class EcPayOrderServiceImpl extends ServiceImpl<EcPayOrderMapper, EcPayOr
     }
 
     @Override
-    public String createOutTradeNo(OrderFromEnum orderFromEnum, Long userId) {
-        String outTradeNo = orderFromEnum.getName() + DateUtils.formatDate(new Date(), DateUtils.DatePattern.PATTERN_ALL_NOSPLIT_EXTENDS.getPattern())+userId;
+    public String createOutTradeNo(Integer fromId) {
+        String outTradeNo = "sell" + DateUtils.formatDate(new Date(), DateUtils.DatePattern.PATTERN_ALL_NOSPLIT_EXTENDS.getPattern())+fromId;
         return outTradeNo;
     }
 

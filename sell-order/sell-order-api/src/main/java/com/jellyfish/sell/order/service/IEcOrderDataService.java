@@ -106,8 +106,8 @@ public interface IEcOrderDataService extends IService<EcOrderData> {
 
     Boolean paySuccessHandleOrder(EcOrderData orderData, EcPayOrder ecPayOrder);
 
-    PlaceOrderData buildOrder(Map<Long, OrderItemMapValue> maps, Long userId, Date now, String idCard,
-                              String name, String phone, String province, String city, String area, String direction, String postCode, String realName);
+    PlaceOrderData buildOrder(Map<Long, OrderItemMapValue> maps, Long userId, Date now,
+                              String name, String phone, String province, String city, String area, String direction, String postCode, String realName,Integer fromId,Integer payType);
 
     /**
      * 订单信息导出
@@ -128,11 +128,11 @@ public interface IEcOrderDataService extends IService<EcOrderData> {
 
     Boolean orderSuccessHandle(EcOrderData orderData);
 
-    List<EcOrderData> orderListNew(Long userId, Integer type, Integer pageIndex, Integer pageSize);
+//    List<EcOrderData> orderListNew(Long userId, Integer type, Integer pageIndex, Integer pageSize);
 
-    List<EcOrderItemData> findOrderItemDataList(EcOrderData orderData, Long userId);
+    List<EcOrderItemData> findOrderItemDataList(EcOrderData orderData, Integer userId);
 
     JSONObject payOrder(EcOrderData orderData, String ip, String openId);
 
-    EcOrderData placeOrderNew(EcOrderData orderData, List<EcOrderItemData> orderItemDatas, UserData userData);
+    EcOrderData placeOrderNew(EcOrderData orderData, List<EcOrderItemData> orderItemDatas);
 }

@@ -60,10 +60,10 @@ public class EcOrderItemDataServiceImpl extends ServiceImpl<EcOrderItemDataMappe
     }
 
     @Override
-    public List<EcOrderItemData> findByOrderIdAndChildOrderIdAndUserId(String orderId, String childOrderId, Long userId) {
+    public List<EcOrderItemData> findByOrderIdAndChildOrderIdAndFromId(String orderId, String childOrderId, Integer fromId) {
         QueryWrapper<EcOrderItemData> wrapper = new QueryWrapper<>(new EcOrderItemData());
         wrapper.eq("order_id", orderId);
-        wrapper.eq("user_id", userId);
+        wrapper.eq("from_id", fromId);
         if (childOrderId != null && !"".equals(childOrderId)) {
             wrapper.eq("child_order_id", childOrderId);
         }

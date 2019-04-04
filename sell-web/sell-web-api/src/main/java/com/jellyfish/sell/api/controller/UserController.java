@@ -1,23 +1,8 @@
 package com.jellyfish.sell.api.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.jellyfish.sell.api.config.GlobalConfig;
-import com.jellyfish.sell.common.api.entity.AppShareMaterial;
-import com.jellyfish.sell.common.api.service.IAppShareMaterialService;
-import com.jellyfish.sell.common.api.service.IUserFormService;
-import com.jellyfish.sell.support.DateUtils;
 import com.jellyfish.sell.support.ResultUtil;
-import com.jellyfish.sell.support.aes.AES;
-import com.jellyfish.sell.support.oss.CloudStorageService;
-import com.jellyfish.sell.support.oss.OssFactory;
-import com.jellyfish.sell.support.sms.MDSendMobileCode;
-import com.jellyfish.sell.support.stat.AccessLogBean;
-import com.jellyfish.sell.support.wechat.WXEmojiFilterUtil;
 import com.jellyfish.sell.support.wechat.proto.IWeChatService;
-import com.jellyfish.sell.user.entity.AddrData;
-import com.jellyfish.sell.user.entity.UserData;
-import com.jellyfish.sell.user.service.IAddrDataService;
 import com.jellyfish.sell.user.service.IUserDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Date;
-import java.util.List;
 
 @Controller
 @RequestMapping("/api/user")

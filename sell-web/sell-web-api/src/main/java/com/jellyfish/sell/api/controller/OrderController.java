@@ -1,9 +1,6 @@
 package com.jellyfish.sell.api.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.jellyfish.sell.common.api.service.IPostPriceTemplateService;
-import com.jellyfish.sell.order.bean.OrderFromEnum;
 import com.jellyfish.sell.order.bean.OrderItemMapValue;
 import com.jellyfish.sell.order.bean.PlaceOrderData;
 import com.jellyfish.sell.order.entity.EcOrderData;
@@ -20,7 +17,6 @@ import com.jellyfish.sell.support.DataUtils;
 import com.jellyfish.sell.support.OrderUtil;
 import com.jellyfish.sell.support.ResultUtil;
 import com.jellyfish.sell.support.wechat.proto.IWeChatService;
-import com.jellyfish.sell.user.entity.UserData;
 import com.jellyfish.sell.user.service.IUserDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,56 +43,10 @@ public class OrderController {
     @Autowired
     private IEcPayOrderService ecPayOrderService;
     @Autowired
-    private IPostPriceTemplateService postPriceTemplateService;
-    @Autowired
     private IWeChatService weChatService;
 
 
-    @ResponseBody
-    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
-    @RequestMapping(value = "/list.do", method = RequestMethod.POST, produces = {"text/html;charset=UTF-8"})
-    public String orderList(@RequestParam(name = "type", required = false,defaultValue = "1") Integer type,
-                            @RequestParam(name = "index", defaultValue = "1", required = false) Integer pageIndex,
-                            @RequestParam(name = "size", defaultValue = "10", required = false) Integer pageSize,
-                            HttpServletRequest request) {
-        try {
-            Long userId = (Long) request.getAttribute("userId");
-            UserData userData = userDataService.findUserDataById(userId);
-            if (userData == null) {
-                return ResultUtil.builderErrorResult(null, "参数错误");
-            }
-            List<EcOrderData> orderDatas = ecOrderDataService.orderListNew(userId, type, pageIndex, pageSize);
-            JSONArray jsonArray = new JSONArray();
-            for (EcOrderData orderData :orderDatas){
-                JSONObject obj = new JSONObject();
-                obj.put("order",orderData);
-                jsonArray.add(obj);
-            }
-            return ResultUtil.builderSuccessResult(jsonArray, "成功");
-        } catch (Exception e) {
-            // TODO: handle exception
-            return ResultUtil.builderErrorResult(null, "失败");
-        }
-    }
 
-
-    @ResponseBody
-    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
-    @RequestMapping(value = "/payWaitCnt.do", method = RequestMethod.POST, produces = {"text/html;charset=UTF-8"})
-    public String payWaitCnt(HttpServletRequest request) {
-        try {
-            Long userId = (Long) request.getAttribute("userId");
-            UserData userData = userDataService.findUserDataById(userId);
-            if (userData == null) {
-                return ResultUtil.builderErrorResult(null, "参数错误");
-            }
-            Integer cnt = ecOrderDataService.countWaitPayOrder(userId, OrderFromEnum.LOTTO.getType(),EcOrderData.ORDER_PAY_STATUS_ING);
-            return ResultUtil.builderSuccessResult(cnt==null?0:cnt, "成功");
-        } catch (Exception e) {
-            // TODO: handle exception
-            return ResultUtil.builderErrorResult(null, "失败");
-        }
-    }
 
     @ResponseBody
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
@@ -104,11 +54,6 @@ public class OrderController {
     public String orderDetail(@RequestParam(name = "orderId") String orderId,
                               HttpServletRequest request) {
         try {
-            Long userId = (Long) request.getAttribute("userId");
-            UserData userData = userDataService.findUserDataById(userId);
-            if (userData == null) {
-                return ResultUtil.builderErrorResult(null, "参数错误");
-            }
             EcOrderData orderData = ecOrderDataService.findByOrderId(orderId);
             if (orderData == null) {
                 return ResultUtil.builderErrorResult(null, "参数错误");
@@ -119,7 +64,7 @@ public class OrderController {
             }
             Long payTime = ecOrderDataService.getOrderPayTime(orderId);
             orderData.setOrderPayTime(payTime);
-            List<EcOrderItemData> orderItemDataList = ecOrderDataService.findOrderItemDataList(orderData, userId);
+            List<EcOrderItemData> orderItemDataList = ecOrderDataService.findOrderItemDataList(orderData, orderData.getFromId());
             orderData.setEcOrderItemDataList(orderItemDataList);
             JSONObject obj = new JSONObject();
             obj.put("order",orderData);
@@ -135,7 +80,6 @@ public class OrderController {
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @RequestMapping(value = "/place.do", method = RequestMethod.POST, produces = {"text/html;charset=UTF-8"})
     public String placeNew(@RequestParam("skuId") Long skuId, @RequestParam("cnt") Integer cnt,
-                           @RequestParam(name = "idCard",required = false) String idCard,
                            @RequestParam(name = "realName",required = false) String realName,
                            @RequestParam("name") String name,
                            @RequestParam("phone") String phone,
@@ -144,13 +88,10 @@ public class OrderController {
                            @RequestParam("area") String area,
                            @RequestParam("direction") String direction,
                            @RequestParam("postCode") String postCode,
+                           @RequestParam("payType")Integer payType,
+                           @RequestParam("openId")String openId,
                            HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
-        UserData userData = userDataService.findUserDataById(userId);
-        if (userData == null) {
-            return ResultUtil.builderErrorResult(null, "参数错误");
-        }
-
+        Integer fromId=userDataService.findFromIdByOpenId(openId);
         EcProductSkuData productSkuData = ecProductSkuDataService.findById(skuId);
         if (productSkuData == null && productSkuData.getIsOnsale()==EcProductSkuData.ONSALE_NO) {
             return ResultUtil.builderErrorResult(null, "参数错误");
@@ -158,19 +99,13 @@ public class OrderController {
         if (productSkuData.getOnsaleNum() <cnt.intValue()) {
             return ResultUtil.builderErrorResult(null, "库存不足");
         }
-        EcProductSpuData ecProductSpuData = ecProductSpuDataService.findById(productSkuData.getProductId());
-        if(ecProductSpuData.getCrossBorder() == EcProductSpuData.CROSS_BORDER_YES) {
-            if ( idCard == null || realName == null || idCard.length() !=18) {
-                return ResultUtil.builderErrorResult("", "身份信息错误");
-            }
-        }
-
         Date now = new Date();
         try {
 
-            Map<Long, OrderItemMapValue> map = buildMap(productSkuData, province, cnt, userId, now);
-            PlaceOrderData placeOrderData = ecOrderDataService.buildOrder(map, userId, now, idCard, name, phone, province, city, area, direction, postCode,realName);
-            EcOrderData newOrder = ecOrderDataService.placeOrderNew(placeOrderData.getOrderData(), placeOrderData.getOrderItemDatas(),userData);
+            Map<Long, OrderItemMapValue> map = buildMap(productSkuData, province, cnt, fromId, now);
+            PlaceOrderData placeOrderData = ecOrderDataService.buildOrder(map, null, now, name, phone, province, city, area, direction, postCode,realName,fromId,payType);
+            EcOrderData newOrder = ecOrderDataService.placeOrderNew(placeOrderData.getOrderData(), placeOrderData.getOrderItemDatas());
+            userDataService.deleteUserByOpenId(openId);
             return ResultUtil.builderSuccessResult(newOrder, "成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,17 +119,9 @@ public class OrderController {
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @RequestMapping(value = "/pay.do", method = RequestMethod.POST, produces = {"text/html;charset=UTF-8"})
     public String placeNew(@RequestParam("orderId") String orderId,
+                           @RequestParam("openId")String openId,
                            HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
-        UserData userData = userDataService.findUserDataById(userId);
-        if (userData == null) {
-            return ResultUtil.builderErrorResult(null, "参数错误");
-        }
         EcOrderData orderData = ecOrderDataService.findByOrderId(orderId);
-        Long nowTime = System.currentTimeMillis();
-        if(nowTime-orderData.getCreateTime().getTime()>15*60*1000L){
-            return ResultUtil.builderErrorResult(null, "已经超过支付时间");
-        }
         if(orderData ==null || orderData.getPayStatus() == EcOrderData.ORDER_PAY_STATUS_FAIL){
             return ResultUtil.builderErrorResult(null, "订单失效，请重新下单");
         }
@@ -218,12 +145,7 @@ public class OrderController {
         }
         String ip = getIpAddress(request);
         try {
-            JSONObject obj =  ecOrderDataService.payOrder(orderData,ip,userData.getOpenId());
-            Long payTime = ecOrderDataService.getOrderPayTime(orderId);
-            payTime = payTime==null?0L:payTime;
-            payTime=payTime-60L;
-            obj.put("payTime",payTime>0L?payTime:0L);
-            //写下订单日志
+            JSONObject obj =  ecOrderDataService.payOrder(orderData,ip,openId);
             return ResultUtil.builderSuccessResult(obj, "成功");
         } catch (Exception e) {
             //logger.error("place order is error",e);
@@ -233,7 +155,7 @@ public class OrderController {
     }
 
 
-    private Map<Long, OrderItemMapValue> buildMap(EcProductSkuData productSkuData, String province, Integer cnt, Long userId, Date now) {
+    private Map<Long, OrderItemMapValue> buildMap(EcProductSkuData productSkuData, String province, Integer cnt, Integer fromId, Date now) {
         Map<Long, OrderItemMapValue> maps = new HashMap<>();
         int i = 1;
         Long shopId = 0L;
@@ -246,94 +168,17 @@ public class OrderController {
        // orderItemMapValue.setPostPrice(postPrice);
         orderItemMapValue.setProductPrice(ecProductSpuDate.getLinePrice());
         List<EcOrderItemData> orderItemDatas = new ArrayList<>();
-        orderItemDatas.add(new EcOrderItemData.Builder(OrderUtil.createOrder("IL", 0, String.format("%02d", i) + userId.toString()), userId, shopId, cnt,
-                ecProductSpuDate.getLinePrice(), productSkuData.getProductId(), productSkuData.getId(), productSkuData.getProductCode()).status(EcOrderItemData.DEFAULT).insertTime(now).build());
+        orderItemDatas.add(new EcOrderItemData.Builder(OrderUtil.createOrder("IL", 0, String.format("%02d", i) + fromId.toString()),null, shopId, cnt,
+                ecProductSpuDate.getLinePrice(), productSkuData.getProductId(), productSkuData.getId(), productSkuData.getProductCode(),fromId).status(EcOrderItemData.DEFAULT).insertTime(now).build());
         orderItemMapValue.setOrderItemDatas(orderItemDatas);
         maps.put(productSkuData.getShopId(), orderItemMapValue);
 
         return maps;
     }
 
-//    private PlaceOrderData buildOrder(Map<Long, OrderItemMapValue> maps, Long userId, Date now, String idCard,
-//                                      String name, String phone, String province, String city, String area, String direction, String postCode) {
-//        List<EcOrderItemData> orderItemDatas = new ArrayList<>();
-//        Double allProductPrice = 0.0D;
-//        Double allPostPrice = 0.0D;
-//        Integer payStatus = EcOrderData.ORDER_PAY_STATUS_DEFAULT;
-//        String orderId = OrderUtil.createOrder("OL", 2, userId.toString());
-//        Integer mapSize = maps.size();
-//        List<EcOrderData> childOrders =  null;
-//        boolean flag = false;
-//        if (mapSize > 1) {
-//            flag = true;
-//            childOrders =  new ArrayList<>();
-//        }
-//        Iterator<Map.Entry<Long, OrderItemMapValue>> entryIterator = maps.entrySet().iterator();
-//        int i = 0;
-//        while (entryIterator.hasNext()) {
-//            i++;
-//            Map.Entry<Long, OrderItemMapValue> entry = entryIterator.next();
-//            if(flag) {
-//                String orderPrefix = "CL";
-//                String childOrderId = com.jellyfish.sell.support.OrderUtil.createOrder(orderPrefix, 0, String.format("%02d", i) + userId.toString());
-//                EcOrderData ecOrderData = new EcOrderData.Builder(childOrderId, userId, EcOrderData.FROM_LOTTO).shopId(entry.getKey()).logisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT)
-//                        .productPrice(entry.getValue().getProductPrice()).showType(EcOrderData.SHOW_TYPE_YES).postPrice(entry.getValue().getPostPrice())
-//                        .createTime(now).parentId(orderId).payStatus(EcOrderData.ORDER_PAY_STATUS_SUCCESS).build();
-//                ecOrderData.setPostCode(postCode);
-//                ecOrderData.setProvince(province);
-//                ecOrderData.setName(name);
-//                ecOrderData.setPhone(phone);
-//                ecOrderData.setDirection(direction);
-//                ecOrderData.setCity(city);
-//                ecOrderData.setArea(area);
-//                ecOrderData.setIdCard(idCard);
-//                childOrders.add(ecOrderData);
-//            }
-//            for (EcOrderItemData orderItemData : entry.getValue().getOrderItemDatas()) {
-//                orderItemData.setOrderId(orderId);
-//                orderItemData.setChildOrderId(null);
-//                orderItemDatas.add(orderItemData);
-//            }
-//            allProductPrice = allProductPrice + entry.getValue().getProductPrice();
-//            allPostPrice = allPostPrice + entry.getValue().getPostPrice();
-//        }
-//        EcOrderData orderData = null;
-//        orderData = new EcOrderData.Builder(orderId, userId, EcOrderData.FROM_LOTTO).productPrice(allProductPrice).showType(EcOrderData.SHOW_TYPE_YES).postPrice(allPostPrice).createTime(now).payStatus(payStatus).build();
-//        orderData.setArea(area);
-//        orderData.setPhone(phone);
-//        orderData.setName(name);
-//        orderData.setProvince(province);
-//        orderData.setCity(city);
-//        orderData.setDirection(direction);
-//        orderData.setPostCode(postCode);
-//        orderData.setIdCard(idCard);
-//        return new PlaceOrderData(orderData, orderItemDatas,childOrders);
-//    }
 
 
 
-//    private Map<Long, List<EcOrderItemData>> getMaps(List<PlaceBean> placeBeans) {
-//        Map<Long, List<EcOrderItemData>> maps = new HashMap<>();
-//        for (PlaceBean placeBean : placeBeans) {
-//            Long ppId = placeBean.getPpId();
-//            Long skuId = placeBean.getSkuId();
-//            Integer num = placeBean.getDeduectCnt();
-//
-//            EcProductSkuData productSkuData = ecProductSkuDataService.findById(skuId);
-//            if (productSkuData.getShopId() == null) {
-//                Long shopId = 0L;
-//            }
-//            if (maps.containsKey(productSkuData.getShopId())) {
-//                maps.get(productSkuData.getShopId()).add(new EcOrderItemData());
-//            } else {
-//                List<EcOrderItemData> lists = new ArrayList<>();
-//                lists.add(new EcOrderItemData());
-//                maps.put(productSkuData.getShopId(), lists);
-//            }
-//
-//        }
-//        return maps;
-//    }
 
     @ResponseBody
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
@@ -382,124 +227,7 @@ public class OrderController {
         }
         return ResultUtil.builderErrorResult("", "失败");
     }
-//    @ResponseBody
-//    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
-//    @RequestMapping(value = "/cancel.do", method = RequestMethod.POST, produces = {"text/html;charset=UTF-8"})
-//    public String cancel(@RequestParam("orderId") String orderId, HttpServletRequest request) {
-//
-//        Long userId = (Long) request.getAttribute("userId");
-//        UserData userData = userDataService.findUserDataById(userId);
-//        if (userData == null) {
-//            return ResultUtil.builderErrorResult(null, "参数错误");
-//        }
-//        EcOrderData orderData = ecOrderDataService.findByOrderId(orderId);
-//        if (orderData == null) {
-//            return ResultUtil.builderErrorResult(null, "参数错误");
-//        }
-//        if (userId.longValue() != orderData.getUserId().longValue()) {
-//            return ResultUtil.builderErrorResult(null, "参数错误");
-//        }
-//        boolean flag = false;
-//        try {
-//            flag = orderService.cancel(userId, orderId);
-//
-//        } catch (Exception e) {
-//            // TODO: handle exception
-//            return ResultUtil.builderErrorResult(null, "失败");
-//        }
-//        if (flag) {
-//
-//            //写入订单取消日志
-//            Date now = new Date();
-//            Integer userFlag = OrderLogBean.OLD;
-//            if (DateUtils.diffDay(userData.getRegistTime(), now) == 0) {
-//                userFlag = OrderLogBean.NEW;
-//            }
-//            OrderLogBean orderLogBean = new OrderLogBean(orderId,userId,OrderLogBean.CANCEL,orderData.getType(),orderData.getProductPrice(),orderData.getPostPrice(),now,userFlag,orderData.getCreateTime());
-//            orderLog.info(orderLogBean.toString());
-//            return ResultUtil.builderSuccessResult(null, "成功");
-//        } else {
-//            return ResultUtil.builderErrorResult(null, "失败");
-//        }
-//    }
 
-//    @ResponseBody
-//    @RequestMapping(value = "/refundReason.do", method = RequestMethod.POST, produces = {"text/html;charset=UTF-8"})
-//    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
-//    public String refundReason(HttpServletRequest request){
-//        List<String> reasons = configService.findReasons();
-//        return ResultUtil.builderSuccessResult(reasons, "成功");
-//    }
-
-    @ResponseBody
-//    @RequestMapping(value = "/refundOrder.do", method = RequestMethod.POST, produces = {"text/html;charset=UTF-8"})
-//    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
-//    public String refundOrder(@RequestParam("refundItems") String refundItems,@RequestParam("reason") String reason,
-//                              @RequestParam(value = "describ",required = false) String describ, @RequestParam(value = "formId",required = false) String formId
-//            ,HttpServletRequest request){
-//
-//        try {
-//            Long userId = (Long) request.getAttribute("userId");
-//            String[] items = refundItems.split(",");
-//            List<String> ids = Arrays.asList(items);
-//            Date now = new Date();
-//            List<OrderItemData> orderItemDataList = orderItemDataService.findOrderItenmDatasByIds(ids, userId);
-//            Boolean flag = checkItems(orderItemDataList);
-//            if (!flag) {
-//                return ResultUtil.builderErrorResult(null, "请选择同一订单的商品");
-//            }
-//
-//            String orderId = orderItemDataList.get(0).getOrderId();
-//            String childOrderId = orderItemDataList.get(0).getChildOrderId();
-//            Long shopId = orderItemDataList.get(0).getShopId();
-//            flag = refundOrderDataService.checkAllOrderRefund(orderItemDataList.size(), orderId, childOrderId, userId);
-//            OrderData orderData = orderDataService.findByOrderId(orderId);
-//            if(orderData.getStatus() !=OrderData.ORDER_STATUS_PAYOVER){
-//                return ResultUtil.builderErrorResult(null, "没有支付的订单不能申请退款");
-//            }
-//            if (childOrderId != null && !"".equals(childOrderId)) {
-//                orderData = orderDataService.findByOrderId(childOrderId);
-//            }
-//            RefundOrderData refundOrderData =refundOrderDataService.buildRefundOrderData(orderId, childOrderId, orderData, userId, now, flag,shopId,reason,describ);
-//            refundOrderData.setFormId(formId);
-//            List<RefundOrderItemData> refundOrderItemDataList = refundOrderDataService.buildRefundOrderItemData(orderItemDataList, refundOrderData.getId(), now);
-//            if(refundOrderDataService.refundOrder(refundOrderData,refundOrderItemDataList,ids,userId)) {
-//                return ResultUtil.builderSuccessResult(null, "成功");
-//            }else{
-//                return ResultUtil.builderErrorResult(null, "失败");
-//            }
-//        }catch (Exception e){
-//            logger.error("refundOrder is error",e);
-//        }
-//        return ResultUtil.builderErrorResult(null, "失败");
-//    }
-
-//    private RefundOrderData createRefundOrderData(String orderId,String childOrderId,OrderData orderData,Long userId,Date now,Boolean flag,Long shopId, String reason,String describ){
-//        String refundOrderId = OrderUtil.createOrder("R",2,userId.toString());
-//        int type = RefundOrderData.NOT_ALL_ORDER_REFUND;
-//        if(flag){
-//            type = RefundOrderData.ALL_ORDER_REFUND;
-//        }
-//        RefundOrderData refundOrderData = new RefundOrderData.Builder(refundOrderId,userId).createTime(now).shopId(shopId).reason(reason).describ(describ).status(RefundOrderData.STATUS_APPLY).orderId(orderId).postPrice(orderData.getPostPrice()).type(type).childOrderId(childOrderId).build();
-//        return refundOrderData;
-//    }
-//
-//    private List<RefundOrderItemData> createRefundOrderItemData(List<OrderItemData> orderItemDatas,String refundOrderId,Date now){
-//        List<RefundOrderItemData> list = new ArrayList<>();
-//        for(OrderItemData orderItemData:orderItemDatas){
-//            list.add(new RefundOrderItemData.Builder(orderItemData).date(now).refundOrderId(refundOrderId).status(RefundOrderItemData.STATUS_REFUND_CANCEL).build());
-//        }
-//        return list;
-//    }
-//
-//
-//    private Boolean checkAllOrderRefund(Integer itemsSize,String orderId,String childOrderId,Long userId){
-//        Integer count  = orderItemDataService.countByOrderIdAndChildOrderIdAndUserId(orderId,childOrderId,userId);
-//        if(count.intValue() == itemsSize.intValue()){
-//            return true;
-//        }
-//        return false;
-//    }
 
     private Boolean checkItems(List<EcOrderItemData> items) {
         Set<Long> set = new HashSet<>();
@@ -518,28 +246,7 @@ public class OrderController {
         return true;
     }
 
-//    @ResponseBody
-//    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
-//    @RequestMapping(value = "/changeOrder", method = RequestMethod.POST, produces = {"text/html;charset=UTF-8"})
-//    public String changeOrder(@RequestParam("orderId") String orderId, HttpServletRequest request) {
-//        Long userId = (Long) request.getAttribute("userId");
-//        UserData userData = userDataService.findUserDataById(userId);
-//        if (userData == null) {
-//            return ResultUtil.builderErrorResult(null, "参数错误");
-//        }
-//        OrderData orderData = orderDataService.findByOrderId(orderId);
-//        if (orderData == null) {
-//            return ResultUtil.builderErrorResult(null, "参数错误");
-//        }
-//        if (userId.longValue() != orderData.getUserId().longValue()) {
-//            return ResultUtil.builderErrorResult(null, "参数错误");
-//        }
-//        Boolean flag = orderDataService.toPay(orderId);
-//        if (flag) {
-//            return ResultUtil.builderSuccessResult(null, "成功");
-//        }
-//        return ResultUtil.builderErrorResult(null, "失败");
-//    }
+
 
 
     public static String getIpAddress(HttpServletRequest request) {

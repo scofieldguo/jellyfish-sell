@@ -10,6 +10,7 @@ import com.codingapi.tx.annotation.TxTransaction;
 import com.jellyfish.sell.db.redis.RedisBean;
 import com.jellyfish.sell.order.bean.OrderFromEnum;
 import com.jellyfish.sell.order.bean.OrderItemMapValue;
+import com.jellyfish.sell.order.bean.PayTypeEnum;
 import com.jellyfish.sell.order.bean.PlaceOrderData;
 import com.jellyfish.sell.order.entity.EcOrderData;
 import com.jellyfish.sell.order.entity.EcOrderItemData;
@@ -43,6 +44,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -85,14 +87,13 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     private IUserDataService userDataService;
 
     @Override
-    @TxTransaction
     @Transactional
     public Boolean createOrder(EcOrderData orderData) {
         // TODO Auto-generated method stub
         String orderId = orderData.getId();
         orderData.setModifyTime(new Date());
         int count = baseMapper.insert(orderData);
-        if (count > 0) {
+        if (count > 0&& orderData.getPayType().intValue()== PayTypeEnum.PAY_TYPE_WECHAT.getType().intValue()) {
             writeOrderPayTime(orderId);
         } else {
             throw new RuntimeException("创建订单失败");
@@ -102,7 +103,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     }
 
     @Override
-    @TxTransaction
     @Transactional
     public Boolean createChildOrder(EcOrderData orderData) {
         int count = baseMapper.insert(orderData);
@@ -114,7 +114,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     }
 
     @Override
-    @Transactional
     @TxTransaction
     public Boolean batchCreateOrder(EcOrderData orderData, List<EcOrderData> orderDatas, Integer type) {
         Boolean flag = this.saveBatch(orderDatas);
@@ -128,15 +127,13 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
 
     @Override
     @Transactional
-    @TxTransaction
     public Boolean updateOrder(EcOrderData orderData) {
         // TODO Auto-generated method stub
         // 更新订单状态
         String orderId = orderData.getId();
-        String userIdStr = orderId.substring(21, orderId.length());
-        Long userId = Long.valueOf(userIdStr);
-        orderData.setUserId(userId);
-        int count = baseMapper.updateByIdAndUserId(orderData);
+        String fromIdStr = orderId.substring(21, orderId.length());
+        orderData.setFromId(Integer.parseInt(fromIdStr));
+        int count = baseMapper.updateByIdAndFromId(orderData);
         if (count > 0) {
             return true;
         } else {
@@ -184,9 +181,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
 //        }
     }
 
-    public static void main(String[] args) {
-        //System.out.println(orderDataServiceImpl.getPayTime(DateUtils.parseDateAll("2018-11-19 20:22:36")));
-    }
 
     private Boolean writeOrderHelpTime(String orderId) {
         String key = ORDER_HELP_KEY + "_" + orderId;
@@ -201,7 +195,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     @Override
     public Boolean writeOrderPayTime(String orderId) {
         String key = ORDER_PAY_KEY + "_" + orderId;
-        return redisBean.setNXStringTime(key, orderId, 16 * 60L, RedisBean.KEY_EXPIRED_LISTEN);
+        return redisBean.setNXStringTime(key, orderId, TimeUnit.HOURS.toSeconds(24), RedisBean.KEY_EXPIRED_LISTEN);
     }
 
     @Override
@@ -534,12 +528,12 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
 
 
     @Override
-    public PlaceOrderData buildOrder(Map<Long, com.jellyfish.sell.order.bean.OrderItemMapValue> maps, Long userId, Date now, String idCard,
-                                     String name, String phone, String province, String city, String area, String direction, String postCode, String realName) {
+    public PlaceOrderData buildOrder(Map<Long, com.jellyfish.sell.order.bean.OrderItemMapValue> maps, Long userId, Date now,
+                                     String name, String phone, String province, String city, String area, String direction, String postCode, String realName,Integer fromId,Integer payType) {
         List<EcOrderItemData> orderItemDatas = new ArrayList<>();
         Double allProductPrice = 0.0D;
         Double allPostPrice = 0.0D;
-        String orderId = OrderUtil.createOrder("OL", 2, userId.toString());
+        String orderId = OrderUtil.createOrder("OL", 2, fromId.toString());
         Integer mapSize = maps.size();
         List<EcOrderData> childOrders = null;
         EcOrderData orderData = null;
@@ -558,10 +552,10 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
             Map.Entry<Long, com.jellyfish.sell.order.bean.OrderItemMapValue> entry = entryIterator.next();
             if (flag) {
                 String orderPrefix = "CL";
-                String childOrderId = com.jellyfish.sell.support.OrderUtil.createOrder(orderPrefix, 0, String.format("%02d", i) + userId.toString());
-                EcOrderData ecOrderData = new EcOrderData.Builder(childOrderId, userId, EcOrderData.FROM_LOTTO).shopId(entry.getKey()).logisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_DEFAULT)
+                String childOrderId = com.jellyfish.sell.support.OrderUtil.createOrder(orderPrefix, 0, String.format("%02d", i) + fromId.toString());
+                EcOrderData ecOrderData = new EcOrderData.Builder(childOrderId, userId, fromId).shopId(entry.getKey()).logisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_DEFAULT)
                         .productPrice(entry.getValue().getProductPrice()).showType(EcOrderData.SHOW_TYPE_NO).postPrice(entry.getValue().getPostPrice())
-                        .createTime(now).parentId(orderId).payStatus(EcOrderData.ORDER_PAY_STATUS_ING).build();
+                        .createTime(now).parentId(orderId).payStatus(EcOrderData.ORDER_PAY_STATUS_ING).payType(payType).build();
                 ecOrderData.setPostCode(postCode);
                 ecOrderData.setProvince(province);
                 ecOrderData.setName(name);
@@ -569,7 +563,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
                 ecOrderData.setDirection(direction);
                 ecOrderData.setCity(city);
                 ecOrderData.setArea(area);
-                ecOrderData.setIdCard(idCard);
                 orderData.setRealName(realName);
                 childOrders.add(ecOrderData);
                 for (EcOrderItemData orderItemData : entry.getValue().getOrderItemDatas()) {
@@ -590,9 +583,9 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
 
         }
         if (flag) {
-            orderData = new EcOrderData.Builder(orderId, userId, EcOrderData.FROM_LOTTO).payStatus(EcOrderData.ORDER_PAY_STATUS_ING).productPrice(allProductPrice).showType(EcOrderData.SHOW_TYPE_YES).postPrice(allPostPrice).createTime(now).build();
+            orderData = new EcOrderData.Builder(orderId, userId, fromId).payStatus(EcOrderData.ORDER_PAY_STATUS_ING).productPrice(allProductPrice).showType(EcOrderData.SHOW_TYPE_YES).postPrice(allPostPrice).createTime(now).build();
         } else {
-            orderData = new EcOrderData.Builder(orderId, userId, EcOrderData.FROM_LOTTO).payStatus(EcOrderData.ORDER_PAY_STATUS_ING).shopId(shopId).productPrice(allProductPrice).showType(EcOrderData.SHOW_TYPE_YES).postPrice(allPostPrice).createTime(now).build();
+            orderData = new EcOrderData.Builder(orderId, userId, fromId).payStatus(EcOrderData.ORDER_PAY_STATUS_ING).shopId(shopId).productPrice(allProductPrice).showType(EcOrderData.SHOW_TYPE_YES).postPrice(allPostPrice).createTime(now).build();
         }
         orderData.setArea(area);
         orderData.setPhone(phone);
@@ -601,8 +594,8 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         orderData.setCity(city);
         orderData.setDirection(direction);
         orderData.setPostCode(postCode);
-        orderData.setIdCard(idCard);
         orderData.setRealName(realName);
+        orderData.setPayType(payType);
         return new PlaceOrderData(orderData, orderItemDatas, childOrders);
     }
 
@@ -756,43 +749,43 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         }
         return null;
     }
+//
+//    @Override
+//    public List<EcOrderData> orderListNew(Long userId, Integer type, Integer pageIndex, Integer pageSize) {
+//        Page<EcOrderData> page = new Page<>(pageIndex, pageSize);
+//        Map<String, Object> paramMap = new HashMap<>();
+//        paramMap.put("userId", userId);
+//        paramMap.put("fromId", EcOrderData.FROM_LOTTO);
+//        paramMap.put("showType", EcOrderData.SHOW_TYPE_YES);
+//        switch (type) {
+//            case 1:
+//                break;
+//            case 2:
+//                paramMap.put("payStatus", EcOrderData.ORDER_PAY_STATUS_ING);
+//                break;
+//            case 3:
+//                paramMap.put("logisticStatus",EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
+//                break;
+//            case 4:paramMap.put("logisticStatus",EcOrderData.ORDER_LOGISTIC_STATUS_POST);
+//                break;
+//        }
+//        IPage<EcOrderData> pages = this.pageFindOrder(page, paramMap);
+//        List<EcOrderData> orderDatas = pages.getRecords();
+//        for (EcOrderData orderData : orderDatas) {
+//            List<EcOrderItemData> orderItemDatas = findOrderItemDataList(orderData, userId);
+//            orderData.setEcOrderItemDataList(orderItemDatas);
+//        }
+//        return orderDatas;
+//    }
+
 
     @Override
-    public List<EcOrderData> orderListNew(Long userId, Integer type, Integer pageIndex, Integer pageSize) {
-        Page<EcOrderData> page = new Page<>(pageIndex, pageSize);
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("userId", userId);
-        paramMap.put("fromId", EcOrderData.FROM_LOTTO);
-        paramMap.put("showType", EcOrderData.SHOW_TYPE_YES);
-        switch (type) {
-            case 1:
-                break;
-            case 2:
-                paramMap.put("payStatus", EcOrderData.ORDER_PAY_STATUS_ING);
-                break;
-            case 3:
-                paramMap.put("logisticStatus",EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
-                break;
-            case 4:paramMap.put("logisticStatus",EcOrderData.ORDER_LOGISTIC_STATUS_POST);
-                break;
-        }
-        IPage<EcOrderData> pages = this.pageFindOrder(page, paramMap);
-        List<EcOrderData> orderDatas = pages.getRecords();
-        for (EcOrderData orderData : orderDatas) {
-            List<EcOrderItemData> orderItemDatas = findOrderItemDataList(orderData, userId);
-            orderData.setEcOrderItemDataList(orderItemDatas);
-        }
-        return orderDatas;
-    }
-
-
-    @Override
-    public List<EcOrderItemData> findOrderItemDataList(EcOrderData orderData, Long userId) {
+    public List<EcOrderItemData> findOrderItemDataList(EcOrderData orderData, Integer fromId) {
         List<EcOrderItemData> orderItemDatas = null;
         if (orderData.getParentId() == null) {
-            orderItemDatas = ecOrderItemDataService.findByOrderIdAndChildOrderIdAndUserId(orderData.getId(), null, userId);
+            orderItemDatas = ecOrderItemDataService.findByOrderIdAndChildOrderIdAndFromId(orderData.getId(), null, fromId);
         } else {
-            orderItemDatas = ecOrderItemDataService.findByOrderIdAndChildOrderIdAndUserId(orderData.getParentId(), orderData.getId(), userId);
+            orderItemDatas = ecOrderItemDataService.findByOrderIdAndChildOrderIdAndFromId(orderData.getParentId(), orderData.getId(), fromId);
         }
         for (EcOrderItemData orderItemData : orderItemDatas) {
             EcProductSkuData productSkuData = ecProductSkuDataService.findById(orderItemData.getSkuid());
@@ -810,12 +803,12 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     @TxTransaction(isStart = true)
     public JSONObject payOrder(EcOrderData orderData, String ip, String openid) {
         String nonceStr = UUID.randomUUID().toString().replace("-", "").trim();
-        String out_trade_no = ecPayOrderService.createOutTradeNo(OrderFromEnum.LOTTO,orderData.getUserId());
+        String out_trade_no = ecPayOrderService.createOutTradeNo(orderData.getFromId());
         Double money = orderData.getProductPrice() + orderData.getPostPrice();
         BigDecimal bMoney = new BigDecimal(Double.toString(money.doubleValue()));
         int totalFree = bMoney.multiply(new BigDecimal("100")).intValue();
 
-        String result = weChatService.getPrepayIdNew(money, orderData.getId(), "水母科技-商品", openid, ip, out_trade_no, nonceStr);
+        String result = weChatService.getPrepayIdNew(money, orderData.getId(), "商品", openid, ip, out_trade_no, nonceStr);
         JSONObject json = JSONObject.parseObject(result);
         String prepayId = json.getString("prepay_id");
         if (prepayId != null) {
@@ -830,7 +823,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
                 payOrder.setPrepayId(prepayId);
                 ecPayOrderService.updatePayOrder(payOrder);
             } else {
-                EcPayOrder newEcPayOrder =ecPayOrderService.createEcPayOrder(OrderFromEnum.LOTTO,out_trade_no,orderData.getUserId(),orderData.getId(),totalFree,prepayId);
+                EcPayOrder newEcPayOrder =ecPayOrderService.createEcPayOrder(orderData.getFromId(),out_trade_no,orderData.getUserId(),orderData.getId(),totalFree,prepayId);
                 ecPayOrderService.addPayOrder(newEcPayOrder);
             }
             orderData.setPayOrder(out_trade_no);
@@ -844,7 +837,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
 
     @Override
     @Transactional
-    public EcOrderData placeOrderNew(EcOrderData orderData, List<EcOrderItemData> orderItemDatas,UserData userData) {
+    public EcOrderData placeOrderNew(EcOrderData orderData, List<EcOrderItemData> orderItemDatas) {
 
         for (EcOrderItemData ecOrderItemData : orderItemDatas) {
             ecProductSkuDataService.deduceProduct(ecOrderItemData.getSkuid(), ecOrderItemData.getNum());
@@ -855,4 +848,5 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
 
         return orderData;
     }
+
 }

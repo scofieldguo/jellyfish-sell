@@ -43,6 +43,7 @@ public class EcOrderItemData implements Serializable {
         this.status = builder.status;
         this.skuid = builder.skuid;
         this.userId = builder.userId;
+        this.fromId=builder.fromId;
     }
 
     /**
@@ -121,6 +122,8 @@ public class EcOrderItemData implements Serializable {
      */
     private String logisticCompany;
 
+    private Integer fromId;
+
     public static class Builder {
 
         private String id;
@@ -137,8 +140,9 @@ public class EcOrderItemData implements Serializable {
         private Date dateYmd;
         private Date insertTime;
         private Date modifyTime;
+        private Integer fromId;
 
-        public Builder(String id, Long userId, Long shopId, Integer num, Double price, Long pid, Long skuid, String productCode) {
+        public Builder(String id, Long userId, Long shopId, Integer num, Double price, Long pid, Long skuid, String productCode,Integer fromId) {
             this.id = id;
             this.userId = userId;
             this.shopId = shopId;
@@ -147,6 +151,7 @@ public class EcOrderItemData implements Serializable {
             this.pid = pid;
             this.skuid = skuid;
             this.productCode = productCode;
+            this.fromId=fromId;
         }
 
         public Builder insertTime(Date val) {
