@@ -15,4 +15,6 @@ public interface IUserDataService extends IService<UserData> {
 
     Boolean deleteUserByOpenId(String openId);
 
+    List<UserData> findByLimitAndSize(Integer skipNo,Integer limit);
+
 }

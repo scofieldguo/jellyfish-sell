@@ -14,10 +14,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Component("userDataService")
@@ -52,5 +54,13 @@ public class UserDataServiceImpl extends ServiceImpl<UserDataMapper, UserData> i
         String key= USER_SESSION_KEY+openId;
         redisBean.delByKey(key,RedisBean.DEFAULT);
         return true;
+    }
+
+    @Override
+    public List<UserData> findByLimitAndSize(Integer skipNo, Integer limit) {
+        QueryWrapper<UserData> queryWrapper = new QueryWrapper<>();
+        String last = "limit "+skipNo+", "+limit;
+        queryWrapper.last(last);
+        return baseMapper.selectList(queryWrapper);
     }
 }

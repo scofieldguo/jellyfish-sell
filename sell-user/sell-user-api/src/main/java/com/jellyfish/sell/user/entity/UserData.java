@@ -43,15 +43,6 @@ public class UserData implements Serializable {
 
     @TableId(type = IdType.AUTO)
     private Long id;
-    /**
-     * 微信openId
-     */
-    private String openId;
-
-    /**
-     * 微信unionId
-     */
-    private String unionId;
 
     /**
      * 名字
@@ -62,47 +53,5 @@ public class UserData implements Serializable {
      * 头像
      */
     private String headImg;
-
-    /**
-     * 状态
-     */
-    private Integer status;
-
-    /**
-     *  性别 0：未知 1：男 2：女
-     */
-    private Integer gender;
-
-    private String province;
-
-    private String city;
-
-    private Date loginTime;
-
-    /**
-     * 注册时间
-     */
-    private Date registTime;
-
-    /**
-     * 新人标识 0：新人 1：不是新人
-     */
-    private Integer newFlag;
-
-    private String mobileNum;
-
-    /**
-     * 来源
-     */
-    private Integer fromId;
-
-    @TableField(exist = false)
-    private String userId;
-
-    private Long masterId;
-
-    private Integer subFlag;
-
-    private Integer newBuy;
 
 }

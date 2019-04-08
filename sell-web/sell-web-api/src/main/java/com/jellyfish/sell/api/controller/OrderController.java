@@ -1,6 +1,7 @@
 package com.jellyfish.sell.api.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jellyfish.sell.order.bean.OrderItemMapValue;
 import com.jellyfish.sell.order.bean.PlaceOrderData;
 import com.jellyfish.sell.order.entity.EcOrderData;
@@ -16,6 +17,9 @@ import com.jellyfish.sell.support.DataUtils;
 import com.jellyfish.sell.support.OrderUtil;
 import com.jellyfish.sell.support.ResultUtil;
 import com.jellyfish.sell.support.wechat.proto.IWeChatService;
+import com.jellyfish.sell.user.entity.AddrData;
+import com.jellyfish.sell.user.entity.UserData;
+import com.jellyfish.sell.user.service.IAddrDataService;
 import com.jellyfish.sell.user.service.IUserDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -41,6 +45,8 @@ public class OrderController {
     private IEcPayOrderService ecPayOrderService;
     @Autowired
     private IWeChatService weChatService;
+    @Autowired
+    private IAddrDataService addrDataService;
 
 
 
@@ -266,4 +272,24 @@ public class OrderController {
         }
         return ip;
     }
+
+
+    @ResponseBody
+    @RequestMapping(value = "payList.do", produces = {"text/html;charset=UTF-8"})
+    public String payList() {
+        Random r=new Random();
+        Integer userAllCnt = userDataService.count(new QueryWrapper<>());
+        Integer userSize =50;
+        int i=r.nextInt(userAllCnt-userSize);
+        List<UserData> userDataList = userDataService.findByLimitAndSize(i,userSize);
+        Integer addrAllCnt = addrDataService.count(new QueryWrapper<>());
+        Integer addrSize =50;
+        int j=r.nextInt(addrAllCnt-addrSize);
+        List<AddrData> addrDataList =addrDataService.findByLimitAndSize(j,addrSize);
+        JSONObject obj  = new JSONObject();
+        obj.put("userDataList",userDataList);
+        obj.put("addrDataList",addrDataList);
+        return ResultUtil.builderSuccessResult(obj, "成功");
+    }
+
 }
