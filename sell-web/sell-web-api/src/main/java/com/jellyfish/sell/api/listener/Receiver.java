@@ -1,11 +1,9 @@
-package com.jellyfish.sell.order.listener;
+package com.jellyfish.sell.api.listener;
 
 import com.aliyun.openservices.ons.api.Message;
 import com.jellyfish.sell.db.mq.LottoOrderMqProducerService;
 import com.jellyfish.sell.db.mq.MqConfig;
 import com.jellyfish.sell.db.mq.MqProducerService;
-import com.jellyfish.sell.order.bean.OrderFromEnum;
-import com.jellyfish.sell.order.entity.EcOrderData;
 import com.jellyfish.sell.order.service.IEcOrderDataService;
 import com.jellyfish.sell.product.service.IEcProductSkuDataService;
 import org.slf4j.Logger;

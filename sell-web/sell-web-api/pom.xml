@@ -85,14 +85,13 @@
         </dependency>
         <dependency>
             <groupId>com.jellyfish.sell</groupId>
-            <artifactId>sell-db-mq</artifactId>
+            <artifactId>sell-db-redis</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.jellyfish.sell</groupId>
-            <artifactId>sell-db-redis</artifactId>
+            <artifactId>sell-db-mq</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>

@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>sell-web-api</module>
+        <module>sell-web-admin</module>
     </modules>
 
 

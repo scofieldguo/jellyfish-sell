@@ -26,7 +26,6 @@ import com.jellyfish.sell.support.DateUtils;
 import com.jellyfish.sell.support.ExeclUtil;
 import com.jellyfish.sell.support.OrderUtil;
 import com.jellyfish.sell.support.wechat.proto.IWeChatService;
-import com.jellyfish.sell.user.service.IUserDataService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,8 +76,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     private IEcPayOrderService ecPayOrderService;
     @Autowired
     private IWeChatService weChatService;
-    @Autowired
-    private IUserDataService userDataService;
 
     @Override
     @Transactional

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component(value = "ecProductAttrDataService")
-//@Service(interfaceClass = IEcProductAttrDataService.class)
 public class EcProductAttrDataServiceImpl extends ServiceImpl<EcProductAttrDataMapper, EcProductAttrData> implements IEcProductAttrDataService {
 
     @Override
