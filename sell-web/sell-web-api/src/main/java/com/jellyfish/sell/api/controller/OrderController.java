@@ -156,13 +156,14 @@ public class OrderController {
         Map<Long, OrderItemMapValue> maps = new HashMap<>();
         int i = 1;
         Long shopId = 0L;
+        Double postPrice=0D;
         OrderItemMapValue orderItemMapValue = new OrderItemMapValue();
         orderItemMapValue.setProductPrice(DataUtils.multiply(productSkuData.getSkuPrice(), cnt));
         //
         EcProductSpuData ecProductSpuDate = ecProductSpuDataService.findById(productSkuData.getProductId());
         shopId = ecProductSpuDate.getShopId();
       //  Double postPrice = postPriceTemplateService.findPostPriceByProvinceAndTemplate(province, repurchaseProductData.getPostPrice());
-       // orderItemMapValue.setPostPrice(postPrice);
+        orderItemMapValue.setPostPrice(postPrice);
         orderItemMapValue.setProductPrice(ecProductSpuDate.getLinePrice());
         List<EcOrderItemData> orderItemDatas = new ArrayList<>();
         orderItemDatas.add(new EcOrderItemData.Builder(OrderUtil.createOrder("IL", 0, String.format("%02d", i) + fromId.toString()),null, shopId, cnt,

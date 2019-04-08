@@ -42,12 +42,6 @@ public class NotifyContoller {
     private static final String ALGORITHM_MODE_PADDING = "AES/ECB/PKCS5Padding";
 
 
-    @RequestMapping("test.do")
-    public void  test(){
-        String out_trade_no = "jellyfish" + DateUtils.formatDate(new Date(), DateUtils.DatePattern.PATTERN_ALL_NOSPLIT_EXTENDS.getPattern());
-        String nonceStr = UUID.randomUUID().toString().replace("-", "").trim();
-        weChatService.getPrepayId(10.0,"O20181127180504472794","商品","oHDwv5f5zKFOj7JlYSJQLoDtI9to","192.168.1.44",out_trade_no,nonceStr);
-    }
 
     @RequestMapping("notify.do")
     public void notify(HttpServletRequest request, HttpServletResponse response) {

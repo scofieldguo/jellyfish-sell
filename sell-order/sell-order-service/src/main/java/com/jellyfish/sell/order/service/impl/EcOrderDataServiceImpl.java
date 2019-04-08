@@ -84,8 +84,10 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         String orderId = orderData.getId();
         orderData.setModifyTime(new Date());
         int count = baseMapper.insert(orderData);
-        if (count > 0&& orderData.getPayType().intValue()== PayTypeEnum.PAY_TYPE_WECHAT.getType().intValue()) {
-            writeOrderPayTime(orderId);
+        if (count > 0) {
+            if (orderData.getPayType().intValue() == PayTypeEnum.PAY_TYPE_WECHAT.getType().intValue()) {
+                writeOrderPayTime(orderId);
+            }
         } else {
             throw new RuntimeException("创建订单失败");
         }
@@ -132,7 +134,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
     }
 
 
-
     private Long getPayTime(String orderId) {
         Long payTime = getOrderPayTime(orderId);
         if (payTime == null || payTime <= 0) {
@@ -153,7 +154,6 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
 //            return (long) (15 * 60 * 1000 - diffTime) / 1000;
 //        }
     }
-
 
 
     @Override
@@ -423,7 +423,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
                 orderData.setPayStatus(EcOrderData.ORDER_PAY_STATUS_SUCCESS);
                 orderData.setLogisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
                 orderData.setPayTime(now);
-                if (childOrders != null && childOrders.size()>0) {
+                if (childOrders != null && childOrders.size() > 0) {
                     orderData.setShowType(EcOrderData.SHOW_TYPE_NO);
                     for (EcOrderData childOrder : childOrders) {
                         childOrder.setShowType(EcOrderData.SHOW_TYPE_YES);
@@ -463,7 +463,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         orderData.setPayStatus(EcOrderData.ORDER_PAY_STATUS_SUCCESS);
         orderData.setLogisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
         orderData.setPayTime(now);
-        if (childOrders != null && childOrders.size()>0) {
+        if (childOrders != null && childOrders.size() > 0) {
             orderData.setShowType(EcOrderData.SHOW_TYPE_NO);
             for (EcOrderData childOrder : childOrders) {
                 childOrder.setShowType(EcOrderData.SHOW_TYPE_YES);
@@ -499,10 +499,11 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
 
     @Override
     public PlaceOrderData buildOrder(Map<Long, com.jellyfish.sell.order.bean.OrderItemMapValue> maps, Long userId, Date now,
-                                     String name, String phone, String province, String city, String area, String direction, String postCode, String realName,Integer fromId,Integer payType) {
+                                     String name, String phone, String province, String city, String area, String direction, String postCode, String realName, Integer fromId, Integer payType) {
         List<EcOrderItemData> orderItemDatas = new ArrayList<>();
         Double allProductPrice = 0.0D;
         Double allPostPrice = 0.0D;
+        Integer logicStatus=payType==PayTypeEnum.PAY_TYPE_WECHAT.getType().intValue()?EcOrderData.ORDER_LOGISTIC_STATUS_DEFAULT:EcOrderData.ORDER_LOGISTIC_STATUS_WAIT;
         String orderId = OrderUtil.createOrder("OL", 2, fromId.toString());
         Integer mapSize = maps.size();
         List<EcOrderData> childOrders = null;
@@ -523,7 +524,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
             if (flag) {
                 String orderPrefix = "CL";
                 String childOrderId = com.jellyfish.sell.support.OrderUtil.createOrder(orderPrefix, 0, String.format("%02d", i) + fromId.toString());
-                EcOrderData ecOrderData = new EcOrderData.Builder(childOrderId, userId, fromId).shopId(entry.getKey()).logisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_DEFAULT)
+                EcOrderData ecOrderData = new EcOrderData.Builder(childOrderId, userId, fromId).shopId(entry.getKey()).logisticStatus(logicStatus)
                         .productPrice(entry.getValue().getProductPrice()).showType(EcOrderData.SHOW_TYPE_NO).postPrice(entry.getValue().getPostPrice())
                         .createTime(now).parentId(orderId).payStatus(EcOrderData.ORDER_PAY_STATUS_ING).payType(payType).build();
                 ecOrderData.setPostCode(postCode);
@@ -533,14 +534,12 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
                 ecOrderData.setDirection(direction);
                 ecOrderData.setCity(city);
                 ecOrderData.setArea(area);
-                if (payType==PayTypeEnum.PAY_TYPE_COD.getType().intValue()){
-                    ecOrderData.setLogisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
-                }
                 orderData.setRealName(realName);
                 childOrders.add(ecOrderData);
                 for (EcOrderItemData orderItemData : entry.getValue().getOrderItemDatas()) {
                     orderItemData.setOrderId(orderId);
                     orderItemData.setChildOrderId(childOrderId);
+                    orderItemData.setLogisticStatus(logicStatus);
                     orderItemDatas.add(orderItemData);
                 }
             } else {
@@ -548,6 +547,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
                 for (EcOrderItemData orderItemData : entry.getValue().getOrderItemDatas()) {
                     orderItemData.setOrderId(orderId);
                     orderItemData.setChildOrderId(null);
+                    orderItemData.setLogisticStatus(logicStatus);
                     orderItemDatas.add(orderItemData);
                 }
             }
@@ -569,9 +569,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
         orderData.setPostCode(postCode);
         orderData.setRealName(realName);
         orderData.setPayType(payType);
-        if (payType==PayTypeEnum.PAY_TYPE_COD.getType().intValue()){
-            orderData.setLogisticStatus(EcOrderData.ORDER_LOGISTIC_STATUS_WAIT);
-        }
+        orderData.setLogisticStatus(logicStatus);
         return new PlaceOrderData(orderData, orderItemDatas, childOrders);
     }
 
@@ -798,7 +796,7 @@ public class EcOrderDataServiceImpl extends ServiceImpl<EcOrderDataMapper, EcOrd
                 payOrder.setPrepayId(prepayId);
                 ecPayOrderService.updatePayOrder(payOrder);
             } else {
-                EcPayOrder newEcPayOrder =ecPayOrderService.createEcPayOrder(orderData.getFromId(),out_trade_no,orderData.getUserId(),orderData.getId(),totalFree,prepayId);
+                EcPayOrder newEcPayOrder = ecPayOrderService.createEcPayOrder(orderData.getFromId(), out_trade_no, orderData.getUserId(), orderData.getId(), totalFree, prepayId);
                 ecPayOrderService.addPayOrder(newEcPayOrder);
             }
             orderData.setPayOrder(out_trade_no);
