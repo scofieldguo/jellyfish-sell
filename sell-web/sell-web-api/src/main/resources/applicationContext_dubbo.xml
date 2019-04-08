@@ -13,8 +13,4 @@
     <dubbo:registry protocol="zookeeper" address="${dubbo1.registry.address}"/>
     <dubbo:reference id="weChatService"
                      interface="com.jellyfish.sell.support.wechat.proto.IWeChatService" check="false"/>
-    <dubbo:reference id="wxSendTemplate"
-                     interface="com.jellyfish.sell.support.wechat.proto.IWxSendTemplate" check="false" retries="0"/>
-    <dubbo:service protocol="dubbo" interface="com.jellyfish.sell.user.service.IUserDataService" ref="userDataService" timeout="30000" retries="0">
-    </dubbo:service>
 </beans>
